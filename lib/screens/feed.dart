@@ -968,7 +968,6 @@ class FeedState extends State<Feed> {
                                       ),
                                     ],
                                   )),
-                              //TODO: be back
 
                               Container(
                                 child: frs.RangeSlider(

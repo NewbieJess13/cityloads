@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">CityLoads</string>
+    <string name="facebook_app_id">793847162056580</string>
+    <string name="facebook_client_token">60e27692f94fb139206d081d1a4260b1</string>
+    <string name="fb_login_protocol_scheme">fb793847162056580</string>
+    <!-- <string name="default_notification_channel_id">481801385394</string> -->
+</resources>

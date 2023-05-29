@@ -1,0 +1,153 @@
+name: CityLoads
+description: A new Flutter project.
+
+# The following line prevents the package from being accidentally published to
+# pub.dev using `pub publish`. This is preferred for private packages.
+publish_to: "none" # Remove this line if you wish to publish to pub.dev
+
+# The following defines the version and build number for your application.
+# A version number is three numbers separated by dots, like 1.2.43
+# followed by an optional build number separated by a +.
+# Both the version and the builder number may be overridden in flutter
+# build by specifying --build-name and --build-number, respectively.
+# In Android, build-name is used as versionName while build-number used as versionCode.
+# Read more about Android versioning at https://developer.android.com/studio/publish/versioning
+# In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
+# Read more about iOS versioning at
+# https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
+version: 1.2.8+9
+
+environment:
+  sdk: ">=2.7.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  font_awesome_flutter: 8.8.1
+  flutter_svg: ^2.0.5
+  cloud_firestore: null
+  firebase_auth: ^4.6.0
+  google_sign_in: ^6.1.2
+  firebase_storage: ^11.2.1
+  fluttertoast: null
+  shared_preferences: ^2.0.6
+  image_picker: ^0.8.7+5
+  cached_network_image: null
+  intl: null
+  # flutter_facebook_login: ^3.0.0
+  http: ^0.13.6
+  email_validator: 1.0.5
+  flutter_tags: ^0.4.9
+  flutter_cupertino_datetime_picker: ^3.0.0
+  # google_maps_place_picker: ^1.0.1
+  google_maps_place_picker_mb: ^3.0.2
+  geolocator: ^9.0.2
+  permission_handler: ^10.2.0
+  provider: ^6.0.5
+  tuple: ^2.0.1
+  uuid: ^3.0.4
+  timeago: 2.0.27
+  jiffy: ^3.0.1
+  flutter_range_slider: ^1.5.0
+  flutter_range_slider_ns: ^0.0.2
+  carousel_slider: ^2.3.1
+  credit_card_type_detector: ^1.0.2
+  credit_card_validate: 0.0.3
+  app_settings: 4.2.0
+  mailer: 3.2.1
+  ionicons: 0.0.3
+  google_fonts: ^2.1.0
+  firebase_messaging: ^14.6.0
+  flutter_local_notifications: ^14.0.0+2
+  auto_size_text: ^2.1.0
+  html: ^0.15.0
+  # The following adds the Cupertino Icons font to your application.
+  # Use with the CupertinoIcons class for iOS style icons.
+  cupertino_icons: ^1.0.3
+  xml2json: ^5.3.1
+  flutter_link_preview:
+    git: "https://github.com/ItzNotABug/flutter_link_preview"
+  url_launcher: ^6.0.7
+  http_parser: ^4.0.2
+  firebase_core: ^2.12.0
+  mailer2: ^1.2.5
+  http_auth: ^1.0.1
+  webview_flutter: ^4.2.0
+  flutter_launcher_icons: ^0.13.1
+  geocoding: ^2.0.0
+  flutter_widget_from_html: ^0.10.0
+  azlistview: ^1.1.1
+  lpinyin: ^2.0.3
+  sliding_up_panel: ^2.0.0+1
+  awesome_dropdown: ^0.0.4
+  # dependency_overrides:
+  #   http: ^0.12.0+4
+  plugin_platform_interface: ^2.0.0
+  flutter_facebook_auth: ^5.0.11
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_native_splash: ^2.2.19
+
+flutter_native_splash:
+  image: assets/images/logo.png
+  android: true
+  ios: true
+  color: "#F1F0F0"
+flutter_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/images/logo.png"
+# For information on the generic Dart part of this file, see the
+# following page: https://dart.dev/tools/pub/pubspec
+# The following section is specific to Flutter.
+flutter:
+  # The following line ensures that the Material Icons font is
+  # included with your application, so that you can use the icons in
+  # the material Icons class.
+  uses-material-design: true
+
+  assets:
+    - assets/images/
+    - assets/icons/
+    - assets/images/logo.png
+    - assets/images/login_bg.png
+    - assets/images/profile_bg.png
+    - assets/images/visa.svg
+    - assets/images/mastercard.svg
+    - assets/images/paypal.svg
+    - assets/images/placeholder.png
+
+  # An image asset can refer to one or more resolution-specific "variants", see
+  # https://flutter.dev/assets-and-images/#resolution-aware.
+  # For details regarding adding assets from package dependencies, see
+  # https://flutter.dev/assets-and-images/#from-packages
+  # To add custom fonts to your application, add a fonts section here,
+  # in this "flutter" section. Each entry in this list should have a
+  # "family" key with the font family name, and a "fonts" key with a
+  # list giving the asset and other descriptors for the font. For
+  # example:
+  fonts:
+    - family: Raleway
+      fonts:
+        - asset: assets/fonts/Raleway/Raleway-Light.ttf
+          weight: 300
+        - asset: assets/fonts/Raleway/Raleway-Regular.ttf
+        - asset: assets/fonts/Raleway/Raleway-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Raleway/Raleway-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Raleway/Raleway-Bold.ttf
+          weight: 700
+    - family: TexGyreAdventor
+      fonts:
+        - asset: assets/fonts/TeX-Gyre-Adventor/texgyreadventor-italic.otf
+          weight: 300
+        - asset: assets/fonts/TeX-Gyre-Adventor/texgyreadventor-regular.otf
+          weight: 500
+        - asset: assets/fonts/TeX-Gyre-Adventor/texgyreadventor-bolditalic.otf
+          weight: 600
+        - asset: assets/fonts/TeX-Gyre-Adventor/texgyreadventor-bold.otf
+          weight: 700
+  # For details regarding fonts from package dependencies,
+  # see https://flutter.dev/custom-fonts/#from-packages

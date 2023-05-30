@@ -3,9 +3,9 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:ionicons/ionicons.dart';
 
 class About extends StatelessWidget {
-  final String about;
+  final String? about;
 
-  const About({Key key, this.about}) : super(key: key);
+  const About({Key? key, this.about}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -39,7 +39,7 @@ class About extends StatelessWidget {
           constraints: BoxConstraints(minHeight: viewportConstraints.maxHeight),
           child: Padding(
             padding: EdgeInsets.all(20.0),
-            child: Text(about, style: TextStyle(height: 1.5, fontSize: 16.0)),
+            child: Text(about!, style: TextStyle(height: 1.5, fontSize: 16.0)),
           ),
         ));
       }),

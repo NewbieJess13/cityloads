@@ -6,7 +6,7 @@ class PaypalServices {
   // String paypalDomain = 'https://api.sandbox.paypal.com';
   String paypalDomain = 'https://api.paypal.com';
 
-  Future<String> getAccessToken(String clientId, String secretKey) async {
+  Future<String?> getAccessToken(String clientId, String secretKey) async {
     try {
       var client = BasicAuthClient(clientId, secretKey);
       var response = await client.post(Uri.parse(
@@ -21,7 +21,7 @@ class PaypalServices {
     }
   }
 
-  Future<Map<String, String>> createPaypalPayment(
+  Future<Map<String, String?>?> createPaypalPayment(
     transactions,
     accessToken,
   ) async {
@@ -39,8 +39,8 @@ class PaypalServices {
         if (body["links"] != null && body["links"].length > 0) {
           List links = body["links"];
 
-          String executeUrl = "";
-          String approvalUrl = "";
+          String? executeUrl = "";
+          String? approvalUrl = "";
           final item = links.firstWhere((o) => o["rel"] == "approval_url",
               orElse: () => null);
           if (item != null) {
@@ -63,7 +63,7 @@ class PaypalServices {
     }
   }
 
-  Future<String> executePayment(url, payerId, accessToken) async {
+  Future<String?> executePayment(url, payerId, accessToken) async {
     try {
       var response = await http.post(url,
           body: convert.jsonEncode({"payer_id": payerId}),

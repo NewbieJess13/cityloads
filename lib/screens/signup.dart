@@ -5,6 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
+import 'package:mailer/smtp_server/gmail.dart';
 import './payment.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -14,7 +15,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import './loader.dart';
 import 'package:CityLoads/emails/welcome.dart' as Email;
-import 'package:mailer2/mailer.dart';
+import 'package:mailer/mailer.dart';
 
 class Signup extends StatefulWidget {
   @override
@@ -22,7 +23,7 @@ class Signup extends StatefulWidget {
 }
 
 class _SignupState extends State<Signup> {
-  FirebaseAuth firebaseAuth;
+  late FirebaseAuth firebaseAuth;
   final firstnameFocus = FocusNode();
   final lastnameFocus = FocusNode();
   final emailFocus = FocusNode();
@@ -37,13 +38,13 @@ class _SignupState extends State<Signup> {
   String confirmPassword = "";
   bool _remember = false;
   bool _skipPayment = false;
-  bool _accept = false;
-  Widget loadingButton;
-  String role;
+  bool? _accept = false;
+  Widget? loadingButton;
+  String? role;
   bool isLoading = false;
-  SharedPreferences prefs;
-  String privacyPolicy;
-  String terms;
+  SharedPreferences? prefs;
+  String? privacyPolicy;
+  String? terms;
   @override
   void initState() {
     Firebase.initializeApp().whenComplete(() {
@@ -470,7 +471,7 @@ class _SignupState extends State<Signup> {
         confirmEmail.isNotEmpty &&
         password.isNotEmpty &&
         confirmPassword.isNotEmpty &&
-        _accept) {
+        _accept!) {
       if (!EmailValidator.validate(email)) {
         FocusScope.of(context).requestFocus(emailFocus);
       } else if (!EmailValidator.validate(confirmEmail)) {
@@ -511,7 +512,7 @@ class _SignupState extends State<Signup> {
         FocusScope.of(context).requestFocus(passwordFocus);
       } else if (confirmPassword.isEmpty) {
         FocusScope.of(context).requestFocus(confirmPasswordFocus);
-      } else if (!_accept) {
+      } else if (!_accept!) {
         Fluttertoast.showToast(
           msg: "Please accept the Terms and Policy.",
           backgroundColor: Colors.red,
@@ -545,7 +546,7 @@ class _SignupState extends State<Signup> {
     ));
 
     if (credential != null) {
-      User firebaseUser = credential.user;
+      User? firebaseUser = credential.user;
       if (firebaseUser != null) {
         FirebaseFirestore.instance
             .collection('users')
@@ -608,22 +609,24 @@ class _SignupState extends State<Signup> {
       emailPassword = _credential.data()['password'];
     });
 
-    var options = new GmailSmtpOptions()
-      ..username = emailAddress
-      ..password = emailPassword;
-    var emailTransport = new SmtpTransport(options);
+    var options = gmail(emailAddress, emailPassword);
 
     // Create our mail/envelope.
-    var envelope = new Envelope()
+    var message = Message()
       ..from = 'info@city-loads.com'
       ..recipients.add(email)
       ..subject = 'Welcome to Cityloads'
       ..html = Email.htmlContent;
 
     // Email it.
-    emailTransport
-        .send(envelope)
-        .then((envelope) => print('Email sent!'))
-        .catchError((e) => print('Error occurred: $e'));
+    try {
+      final sendReport = await send(message, options);
+      print('Message sent: ' + sendReport.toString());
+    } on MailerException catch (e) {
+      print('Message not sent.');
+      for (var p in e.problems) {
+        print('Problem: ${p.code}: ${p.msg}');
+      }
+    }
   }
 }

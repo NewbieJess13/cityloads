@@ -22,8 +22,8 @@ class News extends StatefulWidget {
 
 class _NewsState extends State<News> {
   bool isLoading = true;
-  String userId;
-  SharedPreferences prefs;
+  String? userId;
+  late SharedPreferences prefs;
   List news = [];
   String search = '';
   TextEditingController searchController = TextEditingController();
@@ -159,7 +159,7 @@ class _NewsState extends State<News> {
     String url = 'https://news.google.com/rss/search?q=real+estate&c=UAE';
     List newsRss = await rssToJson(url);
     List newsData = [];
-    for (Map<String, dynamic> newsItem in newsRss) {
+    for (Map<String, dynamic> newsItem in newsRss as List<dynamic>) {
       final document = newsItem['description'];
       String description = removeAllHtmlTags(document);
       newsData.add({
@@ -177,9 +177,9 @@ class _NewsState extends State<News> {
     });
   }
 
-  String removeAllHtmlTags(String htmlText) {
+  String removeAllHtmlTags(String? htmlText) {
     var document = parse(htmlText);
-    String parsedString = parse(document.body.text).documentElement.text;
+    String parsedString = parse(document.body!.text).documentElement!.text;
     return parsedString.replaceAll('\\', '');
   }
 
@@ -239,7 +239,7 @@ class _NewsState extends State<News> {
             }));
   }
 
-  resetSearch([bool refresh]) {
+  resetSearch([bool? refresh]) {
     setState(() {
       search = '';
     });

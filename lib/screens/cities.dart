@@ -6,10 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
 
 class Cities extends StatefulWidget {
-  final List cities;
-  final String countryName;
-  final String countryCode;
-  const Cities({Key key, this.cities, this.countryCode, this.countryName})
+  final List<Map<String, dynamic>> cities;
+  final String? countryName;
+  final String? countryCode;
+  const Cities(
+      {Key? key, required this.cities, this.countryCode, this.countryName})
       : super(key: key);
 
   @override
@@ -29,8 +30,8 @@ class _StatesState extends State<Cities> {
   }
 
   getCities() async {
-    for (Map<String, dynamic> city in widget.cities) {
-      city['cityImageUrl'] = await getCityImage(city['postalCode']);
+    for (Map<String, dynamic>? city in widget.cities) {
+      city!['cityImageUrl'] = await getCityImage(city['postalCode']);
       cityy.add(city['postalCode']);
     }
     cities = cityy.toSet().toList();
@@ -39,7 +40,7 @@ class _StatesState extends State<Cities> {
     });
   }
 
-  getCityImage(String postalCode) async {
+  getCityImage(String? postalCode) async {
     try {
       DocumentSnapshot<Map<String, dynamic>> result = await FirebaseFirestore
           .instance
@@ -47,7 +48,7 @@ class _StatesState extends State<Cities> {
           .doc(postalCode)
           .get();
       if (result.data() != null) {
-        return result.data()['cityImageUrl'];
+        return result.data()!['cityImageUrl'];
       }
     } catch (e) {
       print(e);
@@ -69,7 +70,7 @@ class _StatesState extends State<Cities> {
         elevation: 0.0,
         centerTitle: true,
         title: Text(
-          widget.countryName,
+          widget.countryName!,
           style: TextStyle(
             fontWeight: FontWeight.bold,
             color: Colors.black,
@@ -140,11 +141,11 @@ class _StatesState extends State<Cities> {
 }
 
 class CityCard extends StatelessWidget {
-  final String cityImage;
-  final String cities;
-  final String properties;
+  final String? cityImage;
+  final String? cities;
+  final String? properties;
   const CityCard({
-    Key key,
+    Key? key,
     this.cities,
     this.properties,
     this.cityImage,
@@ -159,7 +160,7 @@ class CityCard extends StatelessWidget {
           Center(
             child: cityImage != null
                 ? CachedNetworkImage(
-                    imageUrl: cityImage,
+                    imageUrl: cityImage!,
                     fit: BoxFit.cover,
                     width: double.infinity,
                     height: double.infinity,
@@ -194,7 +195,7 @@ class CityCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  cities.toUpperCase(),
+                  cities!.toUpperCase(),
                   overflow: TextOverflow.clip,
                   textAlign: TextAlign.center,
                   style: TextStyle(

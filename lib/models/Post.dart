@@ -3,34 +3,34 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:convert';
 
 class Post extends ChangeNotifier {
-  String id;
-  int bedrooms;
-  String location;
-  String userId;
-  String title;
-  List<String> images;
-  String rentPeriod;
-  String year;
-  double long;
-  String availableFor;
-  String size;
-  List types;
-  String timestamp;
-  int baths;
-  int floors;
-  double lat;
-  String interior;
-  bool parking;
-  String currency;
-  String price;
-  bool maid;
-  String description;
-  bool isFavorite;
-  bool isFavoriteLoading;
-  String userPhotoUrl;
-  String userFullName;
-  DocumentSnapshot documentSnapshot;
-  bool scrollToComments;
+  String? id;
+  int? bedrooms;
+  String? location;
+  String? userId;
+  String? title;
+  List<String>? images;
+  String? rentPeriod;
+  String? year;
+  double? long;
+  String? availableFor;
+  String? size;
+  List? types;
+  String? timestamp;
+  int? baths;
+  int? floors;
+  double? lat;
+  String? interior;
+  bool? parking;
+  String? currency;
+  String? price;
+  bool? maid;
+  String? description;
+  bool? isFavorite;
+  late bool isFavoriteLoading;
+  String? userPhotoUrl;
+  String? userFullName;
+  DocumentSnapshot? documentSnapshot;
+  bool? scrollToComments;
 
   Post(
       {this.id,
@@ -56,7 +56,7 @@ class Post extends ChangeNotifier {
       this.maid,
       this.description,
       this.isFavorite,
-      this.isFavoriteLoading,
+      this.isFavoriteLoading = false,
       this.userPhotoUrl,
       this.userFullName,
       this.documentSnapshot,
@@ -77,7 +77,7 @@ class Post extends ChangeNotifier {
     if (json['types'] != null) {
       types = [];
       jsonDecode(json['types']).forEach((v) {
-        types.add(v);
+        types!.add(v);
       });
     }
     timestamp = json['timestamp'];
@@ -91,7 +91,7 @@ class Post extends ChangeNotifier {
     maid = json['maid'];
     description = json['description'];
     isFavorite = json['isFavorite'];
-    isFavoriteLoading = json['isFavoriteLoading'];
+    isFavoriteLoading = json['isFavoriteLoading'] ?? false;
     userPhotoUrl = json['userPhotoUrl'];
     userFullName = json['userFullName'];
     documentSnapshot = json['documentSnapshot'];

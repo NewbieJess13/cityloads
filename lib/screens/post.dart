@@ -20,20 +20,20 @@ import '../models/post.dart' as PostModel;
 import '../helpers/notification.dart';
 
 class Post extends StatefulWidget {
-  final PostModel.Post post;
-  const Post({Key key, this.post}) : super(key: key);
+  final PostModel.Post? post;
+  const Post({Key? key, this.post}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _PostState();
 }
 
 class _PostState extends State<Post> {
-  PostModel.Post post;
-  String userId;
-  String photoUrl;
-  String firstName;
-  String lastName;
-  SharedPreferences prefs;
+  PostModel.Post? post;
+  String? userId;
+  String? photoUrl;
+  String? firstName;
+  String? lastName;
+  late SharedPreferences prefs;
   bool isLoading = true;
   bool favoriteLoading = false;
   bool commentsLoading = true;
@@ -120,14 +120,14 @@ class _PostState extends State<Post> {
                                       currentIndex = index;
                                     });
                                   }),
-                              itemCount: post.images.length,
+                              itemCount: post!.images!.length,
                               itemBuilder:
-                                  (BuildContext context, int itemIndex) =>
+                                  (BuildContext context, int itemIndex, _) =>
                                       Container(
                                 color: Colors.black,
                                 width: MediaQuery.of(context).size.width,
                                 child: CachedNetworkImage(
-                                  imageUrl: post.images[itemIndex],
+                                  imageUrl: post!.images![itemIndex],
                                   imageBuilder: (context, imageProvider) =>
                                       GestureDetector(
                                     onTap: () => {openGallery(itemIndex)},
@@ -172,7 +172,7 @@ class _PostState extends State<Post> {
                                 ),
                               ),
                             ),
-                            post.images.length < 2
+                            post!.images!.length < 2
                                 ? Container(
                                     height: 0.0,
                                   )
@@ -180,7 +180,7 @@ class _PostState extends State<Post> {
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       for (int index = 0;
-                                          index <= post.images.length - 1;
+                                          index <= post!.images!.length - 1;
                                           index++)
                                         Container(
                                           width: 35.0,
@@ -218,7 +218,7 @@ class _PostState extends State<Post> {
                                         Expanded(
                                           child: Container(
                                             child: Text(
-                                              post.title.toUpperCase(),
+                                              post!.title!.toUpperCase(),
                                               style: TextStyle(
                                                   fontSize: 20.0,
                                                   fontWeight: FontWeight.w600,
@@ -228,7 +228,8 @@ class _PostState extends State<Post> {
                                         ),
                                         Container(
                                           child: Text(
-                                            currency + formatNumber(post.price),
+                                            currency +
+                                                formatNumber(post!.price),
                                             textAlign: TextAlign.end,
                                             style: TextStyle(
                                               fontSize: 20.0,
@@ -240,7 +241,7 @@ class _PostState extends State<Post> {
                                       ],
                                     ),
                                     Text(
-                                      'Built in ' + post.year,
+                                      'Built in ' + post!.year!,
                                       style: TextStyle(
                                           fontSize: 16.0, height: 1.5),
                                     ),
@@ -260,14 +261,14 @@ class _PostState extends State<Post> {
                                               child: Padding(
                                             padding: EdgeInsets.only(left: 5.0),
                                             child: Text(
-                                              post.location,
+                                              post!.location!,
                                               style: TextStyle(
                                                   fontSize: 16.0, height: 1.5),
                                             ),
                                           )),
                                           Container(
-                                            child: post.userId != userId
-                                                ? post.isFavoriteLoading
+                                            child: post!.userId != userId
+                                                ? post!.isFavoriteLoading
                                                     ? Container(
                                                         padding:
                                                             EdgeInsets.only(
@@ -295,13 +296,13 @@ class _PostState extends State<Post> {
                                                           },
                                                           splashRadius: 20.0,
                                                           icon: Icon(
-                                                            post.isFavorite ==
+                                                            post!.isFavorite ==
                                                                     true
                                                                 ? Ionicons.heart
                                                                 : Ionicons
                                                                     .heart_outline,
                                                             color:
-                                                                post.isFavorite ==
+                                                                post!.isFavorite ==
                                                                         true
                                                                     ? Colors.red
                                                                     : Colors
@@ -341,7 +342,7 @@ class _PostState extends State<Post> {
                                 padding: EdgeInsets.only(
                                     top: 10.0, left: 15.0, right: 15.0),
                                 child: Text(
-                                  post.description,
+                                  post!.description!,
                                   style: TextStyle(fontSize: 16.0, height: 1.4),
                                 ),
                               ),
@@ -367,8 +368,8 @@ class _PostState extends State<Post> {
                                         markers: Set<Marker>.of(markers),
                                         initialCameraPosition: CameraPosition(
                                             zoom: 14.0,
-                                            target:
-                                                LatLng(post.lat, post.long)),
+                                            target: LatLng(
+                                                post!.lat!, post!.long!)),
                                         onMapCreated:
                                             (GoogleMapController controller) {
                                           mapController.complete(controller);
@@ -462,7 +463,7 @@ class _PostState extends State<Post> {
     if (newComment.isNotEmpty) {
       String timestamp = DateTime.now().millisecondsSinceEpoch.toString();
 
-      post.documentSnapshot.reference.collection('comments').add(
+      post!.documentSnapshot!.reference.collection('comments').add(
           {'userId': userId, 'comment': newComment, 'timestamp': timestamp});
       comments.insert(0, {
         'userPhotoUrl': photoUrl,
@@ -470,12 +471,12 @@ class _PostState extends State<Post> {
         'comment': newComment,
         'timestamp': timestamp
       });
-      if (post.userId != userId) {
-        SendNotification(post.userId, 'Post Comment',
+      if (post!.userId != userId) {
+        SendNotification(post!.userId, 'Post Comment',
             '$firstName $lastName has commented on your post', {
           'type': 'post_comment',
-          'targetUserId': post.userId,
-          'post': jsonEncode(post.toJson())
+          'targetUserId': post!.userId,
+          'post': jsonEncode(post!.toJson())
         });
       }
       commentController.text = '';
@@ -559,16 +560,14 @@ class _PostState extends State<Post> {
     );
   }
 
-  Widget renderProfilePicture(String photoUrl) {
-    Widget profilePicture = (photoUrl != null)
-        ? CircleAvatar(
-            radius: 20.0,
-            backgroundImage: CachedNetworkImageProvider(photoUrl),
-          )
-        : CircleAvatar(
-            radius: 20.0,
-            backgroundImage: AssetImage('assets/images/logo.png'),
-          );
+  Widget renderProfilePicture(String? photoUrl) {
+    print(' fckckck $photoUrl');
+    Widget profilePicture = CircleAvatar(
+      radius: 20.0,
+      backgroundImage: photoUrl != null
+          ? CachedNetworkImageProvider(photoUrl)
+          : AssetImage('assets/images/logo.png') as ImageProvider,
+    );
     return profilePicture;
   }
 
@@ -577,23 +576,24 @@ class _PostState extends State<Post> {
     setState(() {
       userId = prefs.getString('userId');
       photoUrl = prefs.getString('photoUrl');
+
       firstName = prefs.getString('firstName');
       lastName = prefs.getString('lastName');
-      prefs.setString('currentScreen', 'post-${post.id}');
+      prefs.setString('currentScreen', 'post-${post!.id}');
     });
 
-    if (post.id != null && post.documentSnapshot == null) {
+    if (post!.id != null && post!.documentSnapshot == null) {
       DocumentSnapshot postUserDoc = await FirebaseFirestore.instance
           .collection('users')
-          .doc(post.userId)
+          .doc(post!.userId)
           .get();
       DocumentSnapshot postDoc =
-          await postUserDoc.reference.collection('posts').doc(post.id).get();
+          await postUserDoc.reference.collection('posts').doc(post!.id).get();
 
       if (postUserDoc == null || postDoc == null) return;
 
-      post.documentSnapshot = postDoc;
-      post.update();
+      post!.documentSnapshot = postDoc;
+      post!.update();
     }
 
     setState(() {
@@ -601,7 +601,8 @@ class _PostState extends State<Post> {
     });
 
     markers.add(Marker(
-        markerId: MarkerId('position'), position: LatLng(post.lat, post.long)));
+        markerId: MarkerId('position'),
+        position: LatLng(post!.lat!, post!.long!)));
 
     Future.delayed(const Duration(milliseconds: 3000), () {
       setState(() {
@@ -614,7 +615,7 @@ class _PostState extends State<Post> {
   }
 
   getPostFavorite() async {
-    post.documentSnapshot.reference
+    post!.documentSnapshot!.reference
         .collection('favorites')
         .where('userId', isEqualTo: userId)
         .limit(1)
@@ -622,21 +623,21 @@ class _PostState extends State<Post> {
         .then((favoriteSnapshot) {
       List<QueryDocumentSnapshot> favoriteDoc = favoriteSnapshot.docs;
       if (favoriteDoc.length > 0) {
-        post.isFavorite = true;
+        post!.isFavorite = true;
       } else {
-        post.isFavorite = false;
+        post!.isFavorite = false;
       }
-      post.update();
+      post!.update();
     });
   }
 
   getComments() async {
     List newComments = [];
     QuerySnapshot querySnapshot =
-        await post.documentSnapshot.reference.collection('comments').get();
+        await post!.documentSnapshot!.reference.collection('comments').get();
     if (querySnapshot.docs.length > 0) {
       for (QueryDocumentSnapshot doc in querySnapshot.docs) {
-        Map<String, dynamic> comment = doc.data();
+        Map<String, dynamic> comment = doc.data() as Map<String, dynamic>;
         QuerySnapshot result = await FirebaseFirestore.instance
             .collection('users')
             .where('id', isEqualTo: comment['userId'])
@@ -644,8 +645,8 @@ class _PostState extends State<Post> {
             .get();
 
         if (result.docs.length > 0) {
-          String photoUrl = result.docs[0].get('photoUrl');
-          String fullName = result.docs[0].get('firstName') +
+          String? photoUrl = result.docs[0].get('photoUrl');
+          String? fullName = result.docs[0].get('firstName') +
               ' ' +
               result.docs[0].get('lastName');
           comment['userPhotoUrl'] = photoUrl;
@@ -660,7 +661,7 @@ class _PostState extends State<Post> {
       commentsLoading = false;
     });
 
-    if (post.scrollToComments == true) {
+    if (post!.scrollToComments == true) {
       Future.delayed(const Duration(milliseconds: 100), () {
         scrollController.animateTo(700.0,
             duration: Duration(milliseconds: 100), curve: Curves.bounceIn);
@@ -669,26 +670,26 @@ class _PostState extends State<Post> {
   }
 
   toggleFavorite() async {
-    if (post.userId == userId) return;
+    if (post!.userId == userId) return;
 
     setState(() {
-      post.isFavoriteLoading = true;
+      post!.isFavoriteLoading = true;
     });
 
     bool isFavorite;
-    if (post.isFavorite == false) {
-      await post.documentSnapshot.reference
+    if (post!.isFavorite == false) {
+      await post!.documentSnapshot!.reference
           .collection('favorites')
           .add({'userId': userId});
       isFavorite = true;
     } else {
-      QuerySnapshot favorite = await post.documentSnapshot.reference
+      QuerySnapshot favorite = await post!.documentSnapshot!.reference
           .collection('favorites')
           .where('userId', isEqualTo: userId)
           .get();
       List<QueryDocumentSnapshot> favoritesResult = favorite.docs;
       for (int i = 0; i < favoritesResult.length; i++) {
-        await post.documentSnapshot.reference
+        await post!.documentSnapshot!.reference
             .collection('favorites')
             .doc(favoritesResult[i].id)
             .delete();
@@ -697,22 +698,19 @@ class _PostState extends State<Post> {
     }
 
     setState(() {
-      post.isFavorite = isFavorite;
-      post.isFavoriteLoading = false;
+      post!.isFavorite = isFavorite;
+      post!.isFavoriteLoading = false;
     });
-    post.update();
+    post!.update();
   }
 
   Widget profile() {
-    Widget profilePicture = (post.userPhotoUrl != null)
-        ? CircleAvatar(
-            radius: 18.0,
-            backgroundImage: CachedNetworkImageProvider(post.userPhotoUrl),
-          )
-        : CircleAvatar(
-            radius: 18.0,
-            backgroundImage: AssetImage('assets/images/logo.png'),
-          );
+    Widget profilePicture = CircleAvatar(
+      radius: 18.0,
+      backgroundImage: post!.userPhotoUrl != null
+          ? CachedNetworkImageProvider(post!.userPhotoUrl!)
+          : AssetImage('assets/images/logo.png') as ImageProvider,
+    );
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -726,7 +724,7 @@ class _PostState extends State<Post> {
                   context,
                   MaterialPageRoute(
                       builder: (context) => Profile(
-                            userId: post.userId,
+                            userId: post!.userId,
                           )),
                 )
               },
@@ -741,11 +739,11 @@ class _PostState extends State<Post> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          post.userFullName,
+                          post!.userFullName!,
                           style: TextStyle(
                               fontWeight: FontWeight.w700, fontSize: 17.0),
                         ),
-                        Text(parseTimestamp(post.timestamp),
+                        Text(parseTimestamp(post!.timestamp),
                             style: TextStyle(
                                 fontWeight: FontWeight.w300, fontSize: 14.0)),
                       ],
@@ -762,13 +760,13 @@ class _PostState extends State<Post> {
     return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
       stream: FirebaseFirestore.instance
           .collection('users')
-          .doc(post.userId)
+          .doc(post!.userId)
           .snapshots(),
       builder: (context,
           AsyncSnapshot<DocumentSnapshot<Map<String, dynamic>>> snapshot) {
         if (snapshot.hasData &&
-            snapshot.data.data()['isOnline'] == true &&
-            post.userId != userId) {
+            snapshot.data!.data()!['isOnline'] == true &&
+            post!.userId != userId) {
           return Positioned(
             bottom: 0.0,
             right: 0.0,
@@ -792,15 +790,15 @@ class _PostState extends State<Post> {
 
   String parseTimestamp(timestamp) {
     DateTime date = DateTime.fromMillisecondsSinceEpoch(int.parse(timestamp));
-    return Jiffy(date).fromNow();
+    return Jiffy.parseFromDateTime(date).fromNow();
   }
 
   Widget postAttributes() {
     List<Widget> attributes = [];
-    int bedrooms = post.bedrooms;
-    int baths = post.baths;
-    bool parking = post.parking;
-    int floors = post.floors;
+    int bedrooms = post!.bedrooms!;
+    int baths = post!.baths!;
+    bool parking = post!.parking!;
+    int floors = post!.floors!;
 
     attributes.add(Column(
       children: [
@@ -818,7 +816,7 @@ class _PostState extends State<Post> {
         Container(
           margin: EdgeInsets.only(top: 5.0, bottom: 8.0),
           child: Text(
-            post.size + ' sqft',
+            post!.size! + ' sqft',
             style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15.0),
           ),
         ),
@@ -940,7 +938,7 @@ class _PostState extends State<Post> {
 
   String get currency {
     String currencySymbol;
-    switch (post.currency) {
+    switch (post!.currency) {
       case 'USD':
         currencySymbol = '\$';
         break;
@@ -1009,13 +1007,13 @@ class _PostState extends State<Post> {
                             carouselController.jumpToPage(index);
                           });
                         }),
-                    itemCount: post.images.length,
-                    itemBuilder: (BuildContext context, int itemIndex) =>
+                    itemCount: post!.images!.length,
+                    itemBuilder: (BuildContext context, int itemIndex, _) =>
                         Container(
                       color: Colors.black,
                       width: MediaQuery.of(context).size.width,
                       child: CachedNetworkImage(
-                        imageUrl: post.images[itemIndex],
+                        imageUrl: post!.images![itemIndex],
                         imageBuilder: (context, imageProvider) => Container(
                           decoration: BoxDecoration(
                             image: DecorationImage(

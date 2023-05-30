@@ -3,10 +3,10 @@ import 'dart:io';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class ImagePreview extends StatelessWidget {
-  final File image;
-  final Function onRemove;
+  final File? image;
+  final Function? onRemove;
 
-  const ImagePreview({Key key, this.image, this.onRemove}) : super(key: key);
+  const ImagePreview({Key? key, this.image, this.onRemove}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +17,7 @@ class ImagePreview extends StatelessWidget {
           Container(
             decoration: BoxDecoration(
               image: DecorationImage(
-                image: FileImage(image),
+                image: FileImage(image!),
                 fit: BoxFit.cover,
               ),
             ),
@@ -37,7 +37,7 @@ class ImagePreview extends StatelessWidget {
                   FontAwesomeIcons.times,
                   color: Colors.white,
                 ),
-                onPressed: () => {onRemove()},
+                onPressed: () => {onRemove!()},
               ),
             ),
           )

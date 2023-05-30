@@ -20,46 +20,46 @@ import './terms.dart';
 import 'dart:io';
 
 class UserSettings extends StatefulWidget {
-  final UserModel.User user;
-  const UserSettings({Key key, this.user}) : super(key: key);
+  final UserModel.User? user;
+  const UserSettings({Key? key, this.user}) : super(key: key);
   @override
   State<StatefulWidget> createState() => _UserSettingsState();
 }
 
 class _UserSettingsState extends State<UserSettings> {
-  FirebaseAuth firebaseAuth;
+  FirebaseAuth? firebaseAuth;
   bool isLoading = true;
-  String currentUserId;
-  UserModel.User user;
-  SharedPreferences prefs;
+  String? currentUserId;
+  UserModel.User? user;
+  late SharedPreferences prefs;
 
   final firstnameFocus = FocusNode();
   final lastnameFocus = FocusNode();
   final emailFocus = FocusNode();
   final passwordFocus = FocusNode();
-  String firstname = "";
-  String lastname = "";
-  String email = "";
+  String? firstname = "";
+  String? lastname = "";
+  String? email = "";
   String password = "";
 
   TextEditingController firstnameController = TextEditingController();
   TextEditingController lastnameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
 
-  Map<String, dynamic> creditCard;
+  Map<String, dynamic>? creditCard;
   final picker = ImagePicker();
-  File newProfilePicture;
+  File? newProfilePicture;
 
   @override
   initState() {
     super.initState();
     user = widget.user;
-    firstname = user.firstName;
-    lastname = user.lastName;
-    email = user.email;
-    firstnameController.text = user.firstName;
-    lastnameController.text = user.lastName;
-    emailController.text = user.email;
+    firstname = user!.firstName;
+    lastname = user!.lastName;
+    email = user!.email;
+    firstnameController.text = user!.firstName!;
+    lastnameController.text = user!.lastName!;
+    emailController.text = user!.email!;
     getPreferences();
   }
 
@@ -276,9 +276,9 @@ class _UserSettingsState extends State<UserSettings> {
                                 SizedBox(
                                   height: 20.0,
                                   child: Switch(
-                                    value: user.emailNotifications == null
+                                    value: user!.emailNotifications == null
                                         ? false
-                                        : user.emailNotifications,
+                                        : user!.emailNotifications!,
                                     onChanged: (newValue) =>
                                         {updateEmailNotifications(newValue)},
                                   ),
@@ -295,7 +295,7 @@ class _UserSettingsState extends State<UserSettings> {
                             padding: EdgeInsets.only(top: 7.0, bottom: 30.0),
                             child: InkWell(
                               onTap: () {
-                                String about = '';
+                                String? about = '';
                                 DbFirestore().getAboutTerms().then((_about) {
                                   setState(() {
                                     about = _about.data()['about'];
@@ -331,7 +331,7 @@ class _UserSettingsState extends State<UserSettings> {
                             padding: EdgeInsets.only(top: 7.0, bottom: 30.0),
                             child: InkWell(
                               onTap: () {
-                                String terms = '';
+                                String? terms = '';
                                 DbFirestore().getPrivacyPolicy().then((_about) {
                                   setState(() {
                                     terms = _about.data()['terms'];
@@ -382,7 +382,7 @@ class _UserSettingsState extends State<UserSettings> {
     prefs = await SharedPreferences.getInstance();
     setState(() {
       currentUserId = prefs.getString('userId');
-      if (currentUserId != user.id) Navigator.of(context).pop();
+      if (currentUserId != user!.id) Navigator.of(context).pop();
       isLoading = false;
     });
     getCreditCard();
@@ -393,11 +393,11 @@ class _UserSettingsState extends State<UserSettings> {
     List<double> _stops = [0.0, 0.5];
     Widget userAvatar = newProfilePicture != null
         ? CircleAvatar(
-            radius: 60.0, backgroundImage: FileImage(newProfilePicture))
-        : (user.photoUrl != null)
+            radius: 60.0, backgroundImage: FileImage(newProfilePicture!))
+        : (user!.photoUrl != null)
             ? CircleAvatar(
                 radius: 60.0,
-                backgroundImage: CachedNetworkImageProvider(user.photoUrl),
+                backgroundImage: CachedNetworkImageProvider(user!.photoUrl!),
               )
             : CircleAvatar(
                 radius: 60.0,
@@ -443,13 +443,18 @@ class _UserSettingsState extends State<UserSettings> {
   }
 
   pickImage() async {
-    bool photosGranted = await Permission.photos.isGranted;
-    if (photosGranted == false) {
+    PermissionStatus permissionStatus;
+    if (Platform.isAndroid) {
+      permissionStatus = await Permission.storage.request();
+    } else {
+      permissionStatus = await Permission.photos.request();
+    }
+    if (permissionStatus.isPermanentlyDenied) {
       showAllowGalleryDialog();
       return;
     }
 
-    PickedFile pickedImage = await picker.getImage(
+    XFile? pickedImage = await picker.pickImage(
         source: ImageSource.gallery, imageQuality: 80, maxWidth: 800);
     if (pickedImage != null) {
       File image = File(pickedImage.path);
@@ -546,23 +551,23 @@ class _UserSettingsState extends State<UserSettings> {
   }
 
   updateEmailNotifications(bool state) async {
-    setState(() => {user.emailNotifications = state});
+    setState(() => {user!.emailNotifications = state});
 
     await prefs.setBool('emailNotifications', state);
 
     await FirebaseFirestore.instance
         .collection('users')
-        .doc(user.id)
+        .doc(user!.id)
         .update({'emailNotifications': state});
   }
 
   updateProfile() async {
-    if (firstname.isEmpty || lastname.isEmpty || email.isEmpty) {
-      if (firstname.isEmpty) {
+    if (firstname!.isEmpty || lastname!.isEmpty || email!.isEmpty) {
+      if (firstname!.isEmpty) {
         firstnameFocus.requestFocus();
-      } else if (lastname.isEmpty) {
+      } else if (lastname!.isEmpty) {
         lastnameFocus.requestFocus();
-      } else if (email.isEmpty) {
+      } else if (email!.isEmpty) {
         emailFocus.requestFocus();
       }
     } else {
@@ -575,12 +580,12 @@ class _UserSettingsState extends State<UserSettings> {
       }
 
       String error = '';
-      await firebaseAuth.currentUser
-          .updateEmail(email)
+      await firebaseAuth!.currentUser!
+          .updateEmail(email!)
           .catchError((err) => {error = err.toString()});
 
       if (error.isEmpty && password.isNotEmpty) {
-        await firebaseAuth.currentUser
+        await firebaseAuth!.currentUser!
             .updatePassword(password)
             .catchError((err) => {error = err.toString()});
       }
@@ -596,10 +601,10 @@ class _UserSettingsState extends State<UserSettings> {
             timeInSecForIosWeb: 3);
       }
 
-      await firebaseAuth.currentUser
+      await firebaseAuth!.currentUser!
           .updateProfile(displayName: '$firstname $lastname');
 
-      Map<String, String> data = {
+      Map<String, String?> data = {
         'firstName': firstname,
         'lastName': lastname,
         'email': email
@@ -611,34 +616,34 @@ class _UserSettingsState extends State<UserSettings> {
             '-' +
             UniqueKey().toString().replaceAll('[#', '').replaceAll(']', '');
         Reference reference = FirebaseStorage.instance.ref().child(fileName);
-        UploadTask uploadTask = reference.putFile(newProfilePicture);
+        UploadTask uploadTask = reference.putFile(newProfilePicture!);
         TaskSnapshot storageTaskSnapshot =
             await uploadTask.whenComplete(() => null);
         if (storageTaskSnapshot == null) {
           String imageUrl = await storageTaskSnapshot.ref.getDownloadURL();
           data['photoUrl'] = imageUrl;
-          user.photoUrl = imageUrl;
+          user!.photoUrl = imageUrl;
           await prefs.setString('photoUrl', imageUrl);
         }
       }
 
       await FirebaseFirestore.instance
           .collection('users')
-          .doc(user.id)
+          .doc(user!.id)
           .update(data);
 
       setState(() {
         isLoading = false;
       });
 
-      user.firstName = firstname;
-      user.lastName = lastname;
-      user.email = email;
-      user.update();
+      user!.firstName = firstname;
+      user!.lastName = lastname;
+      user!.email = email;
+      user!.update();
 
-      await prefs.setString('firstName', firstname);
-      await prefs.setString('lastName', lastname);
-      await prefs.setString('email', email);
+      await prefs.setString('firstName', firstname!);
+      await prefs.setString('lastName', lastname!);
+      await prefs.setString('email', email!);
 
       Fluttertoast.showToast(
           msg: 'Account updated successfully.',
@@ -649,7 +654,7 @@ class _UserSettingsState extends State<UserSettings> {
   }
 
   openPayment() async {
-    Map<String, dynamic> creditCardData = await Navigator.push(
+    Map<String, dynamic>? creditCardData = await Navigator.push(
       context,
       MaterialPageRoute(
           builder: (context) => Payment(
@@ -679,8 +684,8 @@ class _UserSettingsState extends State<UserSettings> {
     List<QueryDocumentSnapshot> creditCards = creditCardResult.docs;
     if (creditCards.length > 0) {
       setState(() {
-        creditCard = creditCards[0].data();
-        creditCard['id'] = creditCards[0].id;
+        creditCard = creditCards[0].data() as Map<String, dynamic>?;
+        creditCard!['id'] = creditCards[0].id;
       });
     }
   }

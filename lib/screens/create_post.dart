@@ -12,7 +12,7 @@ import 'dart:io';
 import 'package:firebase_storage/firebase_storage.dart';
 
 import './loader.dart';
-import 'package:flutter_tags/flutter_tags.dart';
+import 'package:flutter_tags_x/flutter_tags_x.dart';
 // import 'package:google_maps_place_picker/google_maps_place_picker.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -44,7 +44,7 @@ class _CreatePostState extends State<CreatePost> {
   String title = '';
   String year = '';
   String price = '';
-  String location = '';
+  String? location = '';
   Map geoAddress = Map();
   String description = '';
   String size = '';
@@ -52,25 +52,25 @@ class _CreatePostState extends State<CreatePost> {
   int baths = 0;
   int floors = 0;
   String selectedCurrency = 'USD';
-  bool parking = false;
-  bool maid = false;
+  bool? parking = false;
+  bool? maid = false;
   String availableFor = 'rent';
   String rentPeriod = 'annual';
   String interior = 'furnished';
-  List types;
+  List? types;
   double lat = 0;
   double long = 0;
-  String gmaps_api_key = '';
+  String? gmaps_api_key = '';
 
   final GlobalKey<TagsState> _tagStateKey = GlobalKey<TagsState>();
   ScrollController scrollController = ScrollController();
   TextEditingController yearController = TextEditingController();
   TextEditingController locationController = TextEditingController();
 
-  List<Widget> imagePreviews = List<Widget>();
+  List<Widget> imagePreviews = [];
   List images = [];
-  SharedPreferences prefs;
-  Map<String, dynamic> creditCard;
+  late SharedPreferences prefs;
+  Map<String, dynamic>? creditCard;
   @override
   initState() {
     super.initState();
@@ -796,13 +796,13 @@ class _CreatePostState extends State<CreatePost> {
                   Expanded(
                     child: Text(
                       '************' +
-                          creditCard['cardNumber']
-                              .substring(creditCard['cardNumber'].length - 4),
+                          creditCard!['cardNumber']
+                              .substring(creditCard!['cardNumber'].length - 4),
                       style: TextStyle(
                           fontSize: 22.0, fontWeight: FontWeight.w700),
                     ),
                   ),
-                  cardIcon(creditCard['cardType'])
+                  cardIcon(creditCard!['cardType'])
                 ],
               ),
             ),
@@ -814,7 +814,7 @@ class _CreatePostState extends State<CreatePost> {
     return paymentDetails;
   }
 
-  Widget cardIcon(String cardType) {
+  Widget cardIcon(String? cardType) {
     Widget cardIcon = Container();
     switch (cardType) {
       case 'visa':
@@ -847,7 +847,7 @@ class _CreatePostState extends State<CreatePost> {
   }
 
   openPayment() async {
-    Map<String, dynamic> creditCardData = await Navigator.push(
+    Map<String, dynamic>? creditCardData = await Navigator.push(
       context,
       MaterialPageRoute(
           builder: (context) => Payment(
@@ -882,8 +882,8 @@ class _CreatePostState extends State<CreatePost> {
     List<QueryDocumentSnapshot> creditCards = creditCardResult.docs;
     if (creditCards.length > 0) {
       setState(() {
-        creditCard = creditCards[0].data();
-        creditCard['id'] = creditCards[0].id;
+        creditCard = creditCards[0].data() as Map<String, dynamic>?;
+        creditCard!['id'] = creditCards[0].id;
       });
     }
   }
@@ -1012,16 +1012,16 @@ class _CreatePostState extends State<CreatePost> {
         textStyle: TextStyle(fontSize: 16.0, color: Colors.white),
         onSubmitted: (String str) {
           setState(() {
-            types.addAll({
+            types!.addAll({
               {'title': str, 'active': true}
             });
           });
         },
       ),
       alignment: WrapAlignment.start,
-      itemCount: types.length, // required
+      itemCount: types!.length, // required
       itemBuilder: (int index) {
-        final item = types[index];
+        final item = types![index];
 
         return ItemTags(
           padding: EdgeInsets.only(
@@ -1050,7 +1050,7 @@ class _CreatePostState extends State<CreatePost> {
             size: 20.0,
             onRemoved: () {
               setState(() {
-                types.removeAt(index);
+                types!.removeAt(index);
               });
               return true;
             },
@@ -1091,11 +1091,11 @@ class _CreatePostState extends State<CreatePost> {
         builder: (BuildContext context) => Container(
               margin: EdgeInsets.only(top: 35.0),
               child: PlacePicker(
-                apiKey: gmaps_api_key,
+                apiKey: gmaps_api_key!,
                 //Google Maps API key
 
                 selectedPlaceWidgetBuilder:
-                    (_, PickResult selectedPlace, state, isSearchBarFocused) {
+                    (_, PickResult? selectedPlace, state, isSearchBarFocused) {
                   return isSearchBarFocused
                       ? Container()
                       : FloatingCard(
@@ -1138,7 +1138,7 @@ class _CreatePostState extends State<CreatePost> {
                                       padding: EdgeInsets.all(10.0),
                                       child: Column(
                                         children: [
-                                          Text(selectedPlace.formattedAddress,
+                                          Text(selectedPlace!.formattedAddress!,
                                               textAlign: TextAlign.center,
                                               style: TextStyle(
                                                   color: Colors.black,
@@ -1160,9 +1160,9 @@ class _CreatePostState extends State<CreatePost> {
                                                     locationAddress =
                                                     await placemarkFromCoordinates(
                                                   selectedPlace
-                                                      .geometry.location.lat,
+                                                      .geometry!.location.lat,
                                                   selectedPlace
-                                                      .geometry.location.lng,
+                                                      .geometry!.location.lng,
                                                 );
 
                                                 geoAddress.addAll(
@@ -1173,13 +1173,13 @@ class _CreatePostState extends State<CreatePost> {
                                                 setState(() {
                                                   locationController.text =
                                                       selectedPlace
-                                                          .formattedAddress;
+                                                          .formattedAddress!;
                                                   location = selectedPlace
                                                       .formattedAddress;
                                                   lat = selectedPlace
-                                                      .geometry.location.lat;
+                                                      .geometry!.location.lat;
                                                   long = selectedPlace
-                                                      .geometry.location.lng;
+                                                      .geometry!.location.lng;
                                                 });
                                                 Navigator.pop(context);
                                               },
@@ -1347,7 +1347,7 @@ class _CreatePostState extends State<CreatePost> {
         year.isNotEmpty &&
         price.isNotEmpty &&
         selectedCurrency.isNotEmpty &&
-        location.isNotEmpty &&
+        location!.isNotEmpty &&
         description.isNotEmpty &&
         images.length > 0 &&
         size.isNotEmpty) {
@@ -1389,7 +1389,7 @@ class _CreatePostState extends State<CreatePost> {
       } else if (price.isEmpty) {
         errorMessage = 'Price is required.';
         priceFocus.requestFocus();
-      } else if (location.isEmpty) {
+      } else if (location!.isEmpty) {
         errorMessage = 'Location is required.';
         locationFocus.requestFocus();
         scrollController.animateTo(120.0,
@@ -1420,7 +1420,7 @@ class _CreatePostState extends State<CreatePost> {
     }
   }
 
-  bool paypalSuccess;
+  bool? paypalSuccess;
   Future createPost(postData) async {
     // hideKeyboard();
 
@@ -1430,7 +1430,7 @@ class _CreatePostState extends State<CreatePost> {
         builder: (context) => PayPalWebView(),
       ),
     );
-    if (paypalSuccess) {
+    if (paypalSuccess!) {
       setState(() => isLoading = true);
       List parsedTypes = [];
       for (int i = 0; i <= postData['types'].length - 1; i++) {
@@ -1487,7 +1487,7 @@ class _CreatePostState extends State<CreatePost> {
         'timestamp': timestamp
       });
 
-      for (File image in resizedImages) {
+      for (File image in resizedImages as Iterable<File>) {
         image.delete();
       }
 

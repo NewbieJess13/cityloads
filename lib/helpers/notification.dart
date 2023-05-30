@@ -5,7 +5,7 @@ import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 final FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
-String SERVER_TOKEN = '';
+String? SERVER_TOKEN = '';
 
 getApiKeys() {
   DbFirestore().getKeys().then((_keys) {
@@ -14,12 +14,12 @@ getApiKeys() {
 }
 
 SendNotification(
-    String userId, String title, String body, Map<String, dynamic> data) async {
+    String? userId, String title, String body, Map<String, dynamic> data) async {
   DocumentSnapshot<Map<String, dynamic>> userDoc =
       await FirebaseFirestore.instance.collection('users').doc(userId).get();
   getApiKeys();
   if (userDoc != null) {
-    String deviceToken = userDoc.data()['deviceToken'];
+    String? deviceToken = userDoc.data()!['deviceToken'];
     data['click_action'] = 'FLUTTER_NOTIFICATION_CLICK';
     if (deviceToken != null) {
       await http

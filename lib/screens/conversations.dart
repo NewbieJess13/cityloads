@@ -15,8 +15,8 @@ class Conversations extends StatefulWidget {
 
 class _ConversationsState extends State<Conversations> {
   bool isLoading = true;
-  String userId;
-  SharedPreferences prefs;
+  String? userId;
+  late SharedPreferences prefs;
   List conversations = [];
 
   @override
@@ -94,7 +94,7 @@ class _ConversationsState extends State<Conversations> {
         : CircleAvatar(
             radius: 25.0,
             backgroundImage:
-                CachedNetworkImageProvider(conversation.userPhotoUrl),
+                CachedNetworkImageProvider(conversation.userPhotoUrl!),
           );
 
     return ChangeNotifierProvider.value(
@@ -120,7 +120,7 @@ class _ConversationsState extends State<Conversations> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              conversation.userFullName,
+                              conversation.userFullName!,
                               overflow: TextOverflow.ellipsis,
                               maxLines: 1,
                               style: TextStyle(
@@ -137,7 +137,7 @@ class _ConversationsState extends State<Conversations> {
                         Padding(
                           padding: EdgeInsets.only(top: 2.0),
                           child: Text(
-                            conversation.lastMessage,
+                            conversation.lastMessage!,
                             overflow: TextOverflow.ellipsis,
                             maxLines: 1,
                             style: TextStyle(
@@ -162,7 +162,7 @@ class _ConversationsState extends State<Conversations> {
 
   String parseTimestamp(timestamp) {
     DateTime date = DateTime.fromMillisecondsSinceEpoch(int.parse(timestamp));
-    return Jiffy(date).fromNow();
+    return Jiffy.parseFromDateTime(date).fromNow();
   }
 
   getPreferences() async {
@@ -195,7 +195,7 @@ class _ConversationsState extends State<Conversations> {
           lastMessageResult.docs;
       if (lastMessage.length > 0) {
         var otherUserId = queryConversations[i]
-            .data()['userIds']
+            .data()!['userIds']
             .toList()
             .firstWhere((cuserId) => cuserId != userId, orElse: () => null);
         if (otherUserId != null) {
@@ -207,9 +207,9 @@ class _ConversationsState extends State<Conversations> {
                   .get();
           if (otherUserQuery.docs.length > 0) {
             Map<String, dynamic> otherUser = otherUserQuery.docs[0].data();
-            bool lastMessageIsRead = lastMessage[0].data()['isRead'];
-            String lastMessageContent = '${lastMessage[0].data()['message']}';
-            if (lastMessage[0].data()['userId'] == userId) {
+            bool? lastMessageIsRead = lastMessage[0].data()!['isRead'];
+            String lastMessageContent = '${lastMessage[0].data()!['message']}';
+            if (lastMessage[0].data()!['userId'] == userId) {
               lastMessageIsRead = true;
               lastMessageContent = 'You: $lastMessageContent';
             }
@@ -222,7 +222,7 @@ class _ConversationsState extends State<Conversations> {
               'lastMessageId': lastMessage[0].id,
               'lastMessage': lastMessageContent,
               'lastMessageIsRead': lastMessageIsRead,
-              'lastMessageTimestamp': lastMessage[0].data()['timestamp'],
+              'lastMessageTimestamp': lastMessage[0].data()!['timestamp'],
               'documentSnapshot': queryConversations[i]
             });
             setState(() {
@@ -247,7 +247,7 @@ class _ConversationsState extends State<Conversations> {
           .snapshots(),
       builder: (context,
           AsyncSnapshot<DocumentSnapshot<Map<String, dynamic>>> snapshot) {
-        if (snapshot.hasData && snapshot.data.data()['isOnline'] == true) {
+        if (snapshot.hasData && snapshot.data!.data()!['isOnline'] == true) {
           return Positioned(
             bottom: 0.0,
             right: 0.0,

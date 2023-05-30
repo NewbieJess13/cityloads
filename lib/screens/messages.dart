@@ -12,23 +12,23 @@ import 'dart:convert';
 import 'package:jiffy/jiffy.dart';
 
 class Messages extends StatefulWidget {
-  final Conversation conversation;
-  const Messages({Key key, this.conversation}) : super(key: key);
+  final Conversation? conversation;
+  const Messages({Key? key, this.conversation}) : super(key: key);
   @override
   State<StatefulWidget> createState() => _MessagesState();
 }
 
 class _MessagesState extends State<Messages> {
-  Conversation conversation;
+  Conversation? conversation;
   bool isLoading = true;
-  String userId;
-  String userFirstName;
-  String userLastName;
-  String photoUrl;
-  SharedPreferences prefs;
+  String? userId;
+  String? userFirstName;
+  String? userLastName;
+  String? photoUrl;
+  late SharedPreferences prefs;
   List messages = [];
   TextEditingController messageController = TextEditingController();
-  String newMessage;
+  String? newMessage;
 
   @override
   void initState() {
@@ -104,7 +104,7 @@ class _MessagesState extends State<Messages> {
                                   AlwaysStoppedAnimation<Color>(Colors.black26),
                             )),
                       )
-                    : conversation.id == null || messages.length == 0
+                    : conversation!.id == null || messages.length == 0
                         ? Center(
                             child: Text(
                               'No messages yet',
@@ -117,7 +117,7 @@ class _MessagesState extends State<Messages> {
                             reverse: true,
                             primary: true,
                             itemBuilder: (BuildContext ctxt, int index) {
-                              String nextUserId = '';
+                              String? nextUserId = '';
                               if (index > 0) {
                                 nextUserId =
                                     messages[index - 1].data()['userId'];
@@ -171,7 +171,7 @@ class _MessagesState extends State<Messages> {
     FocusScope.of(context).unfocus();
   }
 
-  Widget buildItem(Map<String, dynamic> message, String nextMessageUserId) {
+  Widget buildItem(Map<String, dynamic> message, String? nextMessageUserId) {
     Widget messageWidget;
     if (message['userId'] == userId) {
       messageWidget = Align(
@@ -255,19 +255,20 @@ class _MessagesState extends State<Messages> {
   String parseTimestamp(timestamp) {
     DateTime now = DateTime.now();
     DateTime date = DateTime.fromMillisecondsSinceEpoch(int.parse(timestamp));
-    int hours = Jiffy(now).diff(date, Units.HOUR);
+    int hours = Jiffy.parseFromDateTime(now)
+        .diff(Jiffy.parseFromDateTime(date), unit: Unit.hour) as int;
     return hours < 24
-        ? Jiffy(date).fromNow()
-        : Jiffy(date).format('MMM d, yyyy, h:mma');
+        ? Jiffy.parseFromDateTime(date).fromNow()
+        : Jiffy.parseFromDateTime(date).format(pattern: 'MMM d, yyyy, h:mma');
   }
 
   Widget otherUserImage(
-      Map<String, dynamic> message, String nextMessageUserId) {
+      Map<String, dynamic> message, String? nextMessageUserId) {
     if (message['userId'] == nextMessageUserId)
       return Container(
         width: 40.0,
       );
-    Widget userPhotoUrl = (conversation.userPhotoUrl == null)
+    Widget userPhotoUrl = (conversation!.userPhotoUrl == null)
         ? CircleAvatar(
             radius: 20.0,
             backgroundImage: AssetImage('assets/images/logo.png'),
@@ -275,17 +276,17 @@ class _MessagesState extends State<Messages> {
         : CircleAvatar(
             radius: 20.0,
             backgroundImage:
-                CachedNetworkImageProvider(conversation.userPhotoUrl),
+                CachedNetworkImageProvider(conversation!.userPhotoUrl!),
           );
     return userPhotoUrl;
   }
 
   Widget profileHeading() {
-    Widget userPhotoUrl = (conversation.userPhotoUrl != null)
+    Widget userPhotoUrl = (conversation!.userPhotoUrl != null)
         ? CircleAvatar(
             radius: 20.0,
             backgroundImage:
-                CachedNetworkImageProvider(conversation.userPhotoUrl),
+                CachedNetworkImageProvider(conversation!.userPhotoUrl!),
           )
         : CircleAvatar(
             radius: 20.0,
@@ -303,7 +304,7 @@ class _MessagesState extends State<Messages> {
         Padding(
           padding: EdgeInsets.only(left: 10.0),
           child: Text(
-            conversation.userFullName,
+            conversation!.userFullName!,
             style: TextStyle(
                 color: Colors.black,
                 fontWeight: FontWeight.w700,
@@ -321,16 +322,16 @@ class _MessagesState extends State<Messages> {
       userFirstName = prefs.getString('firstName');
       userLastName = prefs.getString('lastName');
       photoUrl = prefs.getString('photoUrl');
-      prefs.setString('currentScreen', 'messages-${conversation.id}');
+      prefs.setString('currentScreen', 'messages-${conversation!.id}');
     });
     getMessages();
   }
 
   getMessages() async {
-    if (conversation.id != null) {
-      if (conversation.documentSnapshot != null) {
-        Stream<QuerySnapshot> messagesSnapshot = conversation
-            .documentSnapshot.reference
+    if (conversation!.id != null) {
+      if (conversation!.documentSnapshot != null) {
+        Stream<QuerySnapshot> messagesSnapshot = conversation!
+            .documentSnapshot!.reference
             .collection('messages')
             .snapshots();
         messagesSnapshot.forEach((QuerySnapshot element) {
@@ -346,11 +347,11 @@ class _MessagesState extends State<Messages> {
       } else {
         DocumentSnapshot conversationDoc = await FirebaseFirestore.instance
             .collection('conversations')
-            .doc(conversation.id)
+            .doc(conversation!.id)
             .get();
         if (conversationDoc != null) {
-          conversation.documentSnapshot = conversationDoc;
-          conversation.update();
+          conversation!.documentSnapshot = conversationDoc;
+          conversation!.update();
           getMessages();
         }
       }
@@ -358,12 +359,12 @@ class _MessagesState extends State<Messages> {
   }
 
   sendMessage() async {
-    if (newMessage != null && newMessage.isNotEmpty) {
-      if (conversation.id == null && conversation.userId == null) {
+    if (newMessage != null && newMessage!.isNotEmpty) {
+      if (conversation!.id == null && conversation!.userId == null) {
         return;
       }
-      if (conversation.id == null) {
-        List userIds = [userId, conversation.userId];
+      if (conversation!.id == null) {
+        List userIds = [userId, conversation!.userId];
         QuerySnapshot<Map<String, dynamic>> conversationResult =
             await FirebaseFirestore.instance
                 .collection('conversations')
@@ -376,42 +377,42 @@ class _MessagesState extends State<Messages> {
         Function deepEq = const DeepCollectionEquality.unordered().equals;
         for (DocumentSnapshot<Map<String, dynamic>> element
             in queryConversations) {
-          List queryUserIds = element.data()['userIds'];
+          List? queryUserIds = element.data()!['userIds'];
           if (queryUserIds != null &&
-              deepEq(userIds, List.from(element.data()['userIds']))) {
-            conversation.id = element.id;
-            conversation.documentSnapshot = element;
+              deepEq(userIds, List.from(element.data()!['userIds']))) {
+            conversation!.id = element.id;
+            conversation!.documentSnapshot = element;
             break;
           }
         }
 
-        if (conversation.id == null) {
+        if (conversation!.id == null) {
           // create new conversation
           CollectionReference conversations =
               FirebaseFirestore.instance.collection('conversations');
           DocumentReference newConversation =
               await conversations.add({'userIds': userIds});
-          conversation.id = newConversation.id;
-          conversation.documentSnapshot = await newConversation.get();
+          conversation!.id = newConversation.id;
+          conversation!.documentSnapshot = await newConversation.get();
         }
-        conversation.update();
+        conversation!.update();
         getMessages();
       }
 
       String timestamp = DateTime.now().millisecondsSinceEpoch.toString();
       CollectionReference messages =
-          conversation.documentSnapshot.reference.collection('messages');
-      String newMessageCopy = newMessage;
+          conversation!.documentSnapshot!.reference.collection('messages');
+      String? newMessageCopy = newMessage;
       messages.add({
-        'conversationId': conversation.id,
+        'conversationId': conversation!.id,
         'userId': userId,
         'message': newMessage,
         'timestamp': timestamp
       }).then((DocumentReference message) {
-        conversation.lastMessage = 'You: $newMessageCopy';
-        conversation.lastMessageTimestamp = timestamp;
-        conversation.lastMessageIsRead = true;
-        conversation.update();
+        conversation!.lastMessage = 'You: $newMessageCopy';
+        conversation!.lastMessageTimestamp = timestamp;
+        conversation!.lastMessageIsRead = true;
+        conversation!.update();
       });
       messageController.text = '';
       setState(() {
@@ -423,14 +424,14 @@ class _MessagesState extends State<Messages> {
   }
 
   readLastMessage() async {
-    if (conversation.lastMessageId != null &&
-        conversation.lastMessageIsRead != true) {
-      await conversation.documentSnapshot.reference
+    if (conversation!.lastMessageId != null &&
+        conversation!.lastMessageIsRead != true) {
+      await conversation!.documentSnapshot!.reference
           .collection('messages')
-          .doc(conversation.lastMessageId)
+          .doc(conversation!.lastMessageId)
           .update({'isRead': true});
-      conversation.lastMessageIsRead = true;
-      conversation.update();
+      conversation!.lastMessageIsRead = true;
+      conversation!.update();
     }
   }
 
@@ -438,11 +439,11 @@ class _MessagesState extends State<Messages> {
     return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
       stream: FirebaseFirestore.instance
           .collection('users')
-          .doc(conversation.userId)
+          .doc(conversation!.userId)
           .snapshots(),
       builder: (context,
           AsyncSnapshot<DocumentSnapshot<Map<String, dynamic>>> snapshot) {
-        if (snapshot.hasData && snapshot.data.data()['isOnline'] == true) {
+        if (snapshot.hasData && snapshot.data!.data()!['isOnline'] == true) {
           return Positioned(
             bottom: 0.0,
             right: 0.0,
@@ -465,11 +466,11 @@ class _MessagesState extends State<Messages> {
   }
 
   notifyUser() async {
-    Conversation convo = Conversation.fromJson(conversation.toJson());
+    Conversation convo = Conversation.fromJson(conversation!.toJson());
     convo.userId = userId;
     convo.userFullName = '$userFirstName $userLastName';
     convo.userPhotoUrl = photoUrl;
-    SendNotification(conversation.userId, 'Message',
+    SendNotification(conversation!.userId, 'Message',
         '$userFirstName $userLastName has sent you a message', {
       'type': 'new_message',
       'conversation': jsonEncode(convo.toJson()),

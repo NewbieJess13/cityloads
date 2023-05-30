@@ -22,22 +22,22 @@ import 'dart:convert';
 import 'package:url_launcher/url_launcher.dart';
 
 class Profile extends StatefulWidget {
-  final String userId;
-  const Profile({Key key, this.userId}) : super(key: key);
+  final String? userId;
+  const Profile({Key? key, this.userId}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _ProfileState();
 }
 
 class _ProfileState extends State<Profile> {
-  String currentUserId;
-  UserModel.User user;
-  SharedPreferences prefs;
+  String? currentUserId;
+  UserModel.User? user;
+  SharedPreferences? prefs;
   bool isLoading = true;
   bool contentLoading = true;
   bool hasMessageButton = false;
-  bool currentUser;
-  Conversation conversation;
+  bool? currentUser;
+  Conversation? conversation;
   String contentType = 'posts';
 
   List posts = [];
@@ -98,7 +98,7 @@ class _ProfileState extends State<Profile> {
             actions: [
               currentUser == true
                   ? PopupMenuButton(
-                      onSelected: (value) {
+                      onSelected: (dynamic value) {
                         switch (value) {
                           case 'settings':
                             goToSettings();
@@ -217,30 +217,33 @@ class _ProfileState extends State<Profile> {
   getData() async {
     prefs = await SharedPreferences.getInstance();
     setState(() {
-      currentUserId = prefs.getString('userId');
+      currentUserId = prefs!.getString('userId');
     });
 
     setState(() {
       currentUser = widget.userId == currentUserId || widget.userId == null;
     });
-    String userId = widget.userId;
+    String? userId = widget.userId;
     user = UserModel.User();
     if (userId == null) {
-      user.id = currentUserId;
+      user!.id = currentUserId;
     } else {
-      user.id = userId;
+      user!.id = userId;
     }
 
     DocumentSnapshot<Map<String, dynamic>> userSnapshot =
-        await FirebaseFirestore.instance.collection('users').doc(user.id).get();
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user!.id)
+            .get();
 
     if (userSnapshot.data() == null) return;
 
-    user.firstName = userSnapshot.data()['firstName'];
-    user.lastName = userSnapshot.data()['lastName'];
-    user.email = userSnapshot.data()['email'];
-    user.photoUrl = userSnapshot.data()['photoUrl'];
-    user.emailNotifications = userSnapshot.data()['emailNotifications'];
+    user!.firstName = userSnapshot.data()!['firstName'];
+    user!.lastName = userSnapshot.data()!['lastName'];
+    user!.email = userSnapshot.data()!['email'];
+    user!.photoUrl = userSnapshot.data()!['photoUrl'];
+    user!.emailNotifications = userSnapshot.data()!['emailNotifications'];
 
     await getConversation();
 
@@ -257,13 +260,13 @@ class _ProfileState extends State<Profile> {
     final List<DocumentSnapshot> queryPosts = postsResult.docs;
 
     for (int i = 0; i < queryPosts.length; i++) {
-      Map<String, dynamic> post = queryPosts[i].data();
+      Map<String, dynamic> post = queryPosts[i].data() as Map<String, dynamic>;
       post['id'] = queryPosts[i].id;
-      post['userId'] = queryPosts[i].reference.parent.parent.id;
+      post['userId'] = queryPosts[i].reference.parent.parent!.id;
       post['isFavorite'] = false;
       post['isFavoriteLoading'] = false;
-      post['userPhotoUrl'] = user.photoUrl;
-      post['userFullName'] = "${user.firstName} ${user.lastName}";
+      post['userPhotoUrl'] = user!.photoUrl;
+      post['userFullName'] = "${user!.firstName} ${user!.lastName}";
       post['documentSnapshot'] = queryPosts[i];
       post['types'] = jsonEncode(post['types']);
 
@@ -281,13 +284,13 @@ class _ProfileState extends State<Profile> {
     List newFavorites = [];
     QuerySnapshot favoritesResult = await FirebaseFirestore.instance
         .collectionGroup('favorites')
-        .where('userId', isEqualTo: user.id)
+        .where('userId', isEqualTo: user!.id)
         .get();
     final List<DocumentSnapshot> queryFavorites = favoritesResult.docs;
 
     QuerySnapshot favoriteNews = await FirebaseFirestore.instance
         .collection('favoriteNews')
-        .where('userId', isEqualTo: user.id)
+        .where('userId', isEqualTo: user!.id)
         .get();
     final List<DocumentSnapshot> queryArticles = favoriteNews.docs;
     setState(() {
@@ -298,12 +301,14 @@ class _ProfileState extends State<Profile> {
 
     for (int i = 0; i < queryFavorites.length; i++) {
       DocumentSnapshot queryFavorite =
-          await queryFavorites[i].reference.parent.parent.get();
-      Map<String, dynamic> favorite = queryFavorite.data();
+          await queryFavorites[i].reference.parent.parent!.get();
+      Map<String, dynamic> favorite =
+          queryFavorite.data() as Map<String, dynamic>;
 
       DocumentSnapshot queryFavoriteUser =
-          await queryFavorite.reference.parent.parent.get();
-      Map<String, dynamic> favoriteUser = queryFavoriteUser.data();
+          await queryFavorite.reference.parent.parent!.get();
+      Map<String, dynamic> favoriteUser =
+          queryFavoriteUser.data() as Map<String, dynamic>;
 
       favorite['id'] = queryFavorite.id;
       favorite['userId'] = queryFavoriteUser.id;
@@ -328,7 +333,8 @@ class _ProfileState extends State<Profile> {
     // Favorite Articles
     List favoriteArticles = [];
     for (int i = 0; i < queryArticles.length; i++) {
-      Map<String, dynamic> article = queryArticles[i].data();
+      Map<String, dynamic> article =
+          queryArticles[i].data() as Map<String, dynamic>;
       article['id'] = queryArticles[i].id;
       favoriteArticles.add(article);
     }
@@ -398,11 +404,11 @@ class _ProfileState extends State<Profile> {
                       radius: 61,
                       backgroundColor:
                           Theme.of(context).primaryColor.withOpacity(0.3),
-                      child: (user.photoUrl != null)
+                      child: (user!.photoUrl != null)
                           ? CircleAvatar(
                               radius: 60.0,
                               backgroundImage:
-                                  CachedNetworkImageProvider(user.photoUrl),
+                                  CachedNetworkImageProvider(user!.photoUrl!),
                             )
                           : CircleAvatar(
                               radius: 60.0,
@@ -410,7 +416,7 @@ class _ProfileState extends State<Profile> {
                                   AssetImage('assets/images/logo.png'),
                             ),
                     ),
-                    user.id == currentUserId
+                    user!.id == currentUserId
                         ? Container(
                             height: 0.0,
                           )
@@ -420,13 +426,13 @@ class _ProfileState extends State<Profile> {
                 Container(
                   margin: EdgeInsets.only(top: 20.0, bottom: 5.0),
                   child: Text(
-                    "${user.firstName} ${user.lastName}",
+                    "${user!.firstName} ${user!.lastName}",
                     style:
                         TextStyle(fontWeight: FontWeight.bold, fontSize: 24.0),
                   ),
                 ),
                 Text(
-                  user.email,
+                  user!.email!,
                   style: TextStyle(
                       fontSize: 14.0, color: Theme.of(context).primaryColor),
                 )
@@ -442,11 +448,11 @@ class _ProfileState extends State<Profile> {
     return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
       stream: FirebaseFirestore.instance
           .collection('users')
-          .doc(user.id)
+          .doc(user!.id)
           .snapshots(),
       builder: (context,
           AsyncSnapshot<DocumentSnapshot<Map<String, dynamic>>> snapshot) {
-        if (snapshot.hasData && snapshot.data.data()['isOnline'] == true) {
+        if (snapshot.hasData && snapshot.data!.data()!['isOnline'] == true) {
           return Positioned(
             bottom: 8.0,
             right: 8.0,
@@ -590,7 +596,7 @@ class _ProfileState extends State<Profile> {
   }
 
   Widget renderContent() {
-    Widget content;
+    late Widget content;
     switch (contentType) {
       case 'posts':
         content = renderPosts();
@@ -710,7 +716,7 @@ class _ProfileState extends State<Profile> {
                                 ),
                               ]),
                         ),
-                        currentUserId == user.id || widget.userId == null
+                        currentUserId == user!.id || widget.userId == null
                             ? Positioned(
                                 top: -5,
                                 right: 0,
@@ -901,7 +907,7 @@ class _ProfileState extends State<Profile> {
       child: GestureDetector(
         onTap: () => goToPost(post),
         child: CachedNetworkImage(
-          imageUrl: post.images[0],
+          imageUrl: post.images![0],
           imageBuilder: (context, imageProvider) => Container(
             decoration: BoxDecoration(
               image: DecorationImage(
@@ -928,14 +934,16 @@ class _ProfileState extends State<Profile> {
   }
 
   goToPost(PostModel.Post post) async {
-    PostModel.Post postData = await Navigator.push(
+    PostModel.Post? postData = await Navigator.push(
       context,
       MaterialPageRoute(
           builder: (context) => Post(
                 post: post,
               )),
     );
-    if (postData != null && user.id == currentUserId && !postData.isFavorite) {
+    if (postData != null &&
+        user!.id == currentUserId &&
+        !postData.isFavorite!) {
       int index = favorites.indexWhere((element) => element.id == postData.id);
       if (index > -1) {
         setState(() {
@@ -966,12 +974,12 @@ class _ProfileState extends State<Profile> {
   }
 
   getConversation() async {
-    if (currentUserId == user.id) return;
+    if (currentUserId == user!.id) return;
     Conversation getConversation = Conversation.fromJson({
       'id': null,
-      'userId': user.id,
-      'userFullName': '${user.firstName} ${user.lastName}',
-      'userPhotoUrl': user.photoUrl,
+      'userId': user!.id,
+      'userFullName': '${user!.firstName} ${user!.lastName}',
+      'userPhotoUrl': user!.photoUrl,
       'lastMessageId': null,
       'lastMessage': null,
       'lastMessageIsRead': false,
@@ -986,9 +994,9 @@ class _ProfileState extends State<Profile> {
         conversationResult.docs;
     Function deepEq = const DeepCollectionEquality.unordered().equals;
     for (DocumentSnapshot<Map<String, dynamic>> element in queryConversations) {
-      List queryUserIds = element.data()['userIds'];
+      List? queryUserIds = element.data()!['userIds'];
       if (queryUserIds != null &&
-          deepEq(userIds, List.from(element.data()['userIds']))) {
+          deepEq(userIds, List.from(element.data()!['userIds']))) {
         getConversation.documentSnapshot = element;
         getConversation.id = element.id;
         break;

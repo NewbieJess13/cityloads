@@ -11,17 +11,17 @@ class PayPalWebView extends StatefulWidget {
 }
 
 class _PayPalWebViewState extends State<PayPalWebView> {
-  String checkoutUrl;
-  String executeUrl;
-  String accessToken;
+  String? checkoutUrl;
+  String? executeUrl;
+  String? accessToken;
   PaypalServices services = PaypalServices();
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  WebViewController _webViewController;
-  String paypalClientId;
-  String paypalSecretKey;
+  late WebViewController _webViewController;
+  String? paypalClientId;
+  String? paypalSecretKey;
   String returnURL = 'return.example.com';
   String cancelURL = 'cancel.example.com';
-  String chargeAmount;
+  String? chargeAmount;
   Map<dynamic, dynamic> defaultCurrency = {
     "symbol": "USD ",
     "decimalDigits": 2,
@@ -39,8 +39,8 @@ class _PayPalWebViewState extends State<PayPalWebView> {
       }
     ];
     // checkout invoice details
-    String totalAmount = chargeAmount;
-    String subTotalAmount = chargeAmount;
+    String? totalAmount = chargeAmount;
+    String? subTotalAmount = chargeAmount;
     String shippingCost = '0';
     int shippingDiscountCost = 0;
 
@@ -89,7 +89,7 @@ class _PayPalWebViewState extends State<PayPalWebView> {
   instantiateWebViewController() {
     _webViewController = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..loadRequest(Uri.parse(checkoutUrl))
+      ..loadRequest(Uri.parse(checkoutUrl!))
       ..setNavigationDelegate(NavigationDelegate(
         onNavigationRequest: (request) {
           if (request.url.contains(returnURL)) {
@@ -129,7 +129,7 @@ class _PayPalWebViewState extends State<PayPalWebView> {
           },
         );
         accessToken =
-            await services.getAccessToken(paypalClientId, paypalSecretKey);
+            await services.getAccessToken(paypalClientId!, paypalSecretKey!);
         final transactions = getOrderParams();
         final res =
             await services.createPaypalPayment(transactions, accessToken);
@@ -140,7 +140,7 @@ class _PayPalWebViewState extends State<PayPalWebView> {
           });
         }
       } catch (e) {
-        print('exception: ' + e.message);
+        print('exception: ' + e.toString());
         Fluttertoast.showToast(
           msg: e.toString(),
           backgroundColor: Colors.green,

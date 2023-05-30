@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Conversation extends ChangeNotifier {
-  String id;
-  String userId;
-  String userFullName;
-  String userPhotoUrl;
-  String lastMessageId;
-  String lastMessage;
-  String lastMessageTimestamp;
-  bool lastMessageIsRead;
-  DocumentSnapshot documentSnapshot;
+  String? id;
+  String? userId;
+  String? userFullName;
+  String? userPhotoUrl;
+  String? lastMessageId;
+  String? lastMessage;
+  String? lastMessageTimestamp;
+  bool? lastMessageIsRead;
+  DocumentSnapshot? documentSnapshot;
 
   Conversation({
     this.id,

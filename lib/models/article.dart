@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
 class Article extends ChangeNotifier {
-  String url;
-  String title;
-  String description;
-  String pubDate;
-  String photoUrl;
-  String favoriteNewsId;
-  bool isFavoriteLoading;
+  String? url;
+  String? title;
+  String? description;
+  String? pubDate;
+  String? photoUrl;
+  String? favoriteNewsId;
+  bool? isFavoriteLoading;
 
   Article(
       {this.url,

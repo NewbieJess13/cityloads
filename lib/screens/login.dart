@@ -28,8 +28,8 @@ class _LoginState extends State<Login> {
       'email',
     ],
   );
-  FirebaseAuth firebaseAuth;
-  SharedPreferences prefs;
+  late FirebaseAuth firebaseAuth;
+  late SharedPreferences prefs;
   final emailFocus = FocusNode();
   final passwordFocus = FocusNode();
   String _email = "";
@@ -37,8 +37,8 @@ class _LoginState extends State<Login> {
   bool _remember = false;
   int _buttonState = 0;
   bool isLoading = false;
-  User currentUser;
-  String resetEmail;
+  late User currentUser;
+  late String resetEmail;
   final resetEmailFocus = FocusNode();
   bool resetFormLoading = false;
   final FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
@@ -335,7 +335,8 @@ class _LoginState extends State<Login> {
             .collection('users')
             .doc(firebaseUser.uid)
             .get();
-        Map<String, dynamic> userData = userDoc.data();
+        Map<String, dynamic>? userData =
+            userDoc.data() as Map<String, dynamic>?;
         if (userData != null) {
           updateCfmToken(userDoc);
           // Write data to local
@@ -389,17 +390,19 @@ class _LoginState extends State<Login> {
         });
 
         if (credential != null) {
-          User firebaseUser = credential.user;
+          User firebaseUser = credential.user!;
           print(firebaseUser.email);
           if (firebaseUser.emailVerified) {
             final DocumentSnapshot userDoc = await FirebaseFirestore.instance
                 .collection('users')
                 .doc(firebaseUser.uid)
                 .get();
-            Map<String, dynamic> userData = userDoc.data();
+            Map<String, dynamic>? userData =
+                userDoc.data() as Map<String, dynamic>?;
             if (userData != null) {
               updateCfmToken(userDoc);
-              Map<String, dynamic> userData = userDoc.data();
+              Map<String, dynamic> userData =
+                  userDoc.data() as Map<String, dynamic>;
               // Write data to local
               await prefs.setString('userId', userData['id']);
               await prefs.setString('firstName', userData['firstName']);
@@ -446,7 +449,7 @@ class _LoginState extends State<Login> {
     final LoginResult result = await FacebookAuth.instance.login();
     if (result.status == LoginStatus.success) {
       final OAuthCredential credential =
-          FacebookAuthProvider.credential(result.accessToken.token);
+          FacebookAuthProvider.credential(result.accessToken!.token);
       // Once signed in, return the UserCredential
       return await FirebaseAuth.instance.signInWithCredential(credential);
     }
@@ -529,19 +532,19 @@ class _LoginState extends State<Login> {
   }
 
   loginGoogle() async {
-    GoogleSignInAccount googleUser = await googleSignIn.signIn();
+    GoogleSignInAccount? googleUser = await googleSignIn.signIn();
     if (googleUser != null) {
       GoogleSignInAuthentication googleAuth = await googleUser.authentication;
       this.setState(() {
         isLoading = true;
       });
-      Map<String, dynamic> profile = parseJwt(googleAuth.idToken);
+      Map<String, dynamic>? profile = parseJwt(googleAuth.idToken);
 
       final AuthCredential credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
-      User firebaseUser =
+      User? firebaseUser =
           (await firebaseAuth.signInWithCredential(credential)).user;
 
       if (firebaseUser != null) {
@@ -549,7 +552,8 @@ class _LoginState extends State<Login> {
             .collection('users')
             .doc(firebaseUser.uid)
             .get();
-        Map<String, dynamic> userData = userDoc.data();
+        Map<String, dynamic>? userData =
+            userDoc.data() as Map<String, dynamic>?;
         print(userData);
         if (userData == null) {
           // Insert data to server if new user
@@ -558,7 +562,7 @@ class _LoginState extends State<Login> {
               .doc(firebaseUser.uid)
               .set({
             'id': firebaseUser.uid,
-            'firstName': profile['given_name'],
+            'firstName': profile!['given_name'],
             'lastName': profile['family_name'],
             'email': profile['email'],
             'loginType': 'google',
@@ -575,10 +579,13 @@ class _LoginState extends State<Login> {
           await prefs.setString('lastName', profile['last_name']);
           await prefs.setString('email', profile['email']);
           await prefs.setString('loginType', profile['loginType']);
-          await prefs.setString('photoUrl', currentUser.photoURL);
+          if (currentUser.photoURL != null) {
+            await prefs.setString('photoUrl', currentUser.photoURL!);
+          }
         } else {
           updateCfmToken(userDoc);
-          Map<String, dynamic> userData = userDoc.data();
+          Map<String, dynamic> userData =
+              userDoc.data() as Map<String, dynamic>;
           // Write data to local
           await prefs.setString('userId', userData['id']);
           await prefs.setString('firstName', userData['firstName']);
@@ -606,7 +613,7 @@ class _LoginState extends State<Login> {
   }
 
   updateCfmToken(DocumentSnapshot userDoc) async {
-    String deviceToken = await firebaseMessaging.getToken();
+    String? deviceToken = await firebaseMessaging.getToken();
     print(deviceToken);
     // Fluttertoast.showToast(
     //     msg: 'updateCfmToken: ' + deviceToken,
@@ -617,7 +624,7 @@ class _LoginState extends State<Login> {
     userDoc.reference.update({'deviceToken': deviceToken, 'isOnline': true});
   }
 
-  static Map<String, dynamic> parseJwt(String token) {
+  static Map<String, dynamic>? parseJwt(String? token) {
     // validate token
     if (token == null) return null;
     final List<String> parts = token.split('.');

@@ -3,8 +3,9 @@ import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:ionicons/ionicons.dart';
+import 'package:mailer/smtp_server.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:mailer2/mailer.dart';
+import 'package:mailer/mailer.dart';
 import 'package:CityLoads/helpers/conn_firestore.dart';
 
 class HelpScreen extends StatefulWidget {
@@ -19,7 +20,7 @@ class _HelpScreenState extends State<HelpScreen> {
   TextEditingController emailController = TextEditingController();
   FocusNode concernFocus = FocusNode();
   TextEditingController concernController = TextEditingController();
-  SharedPreferences prefs;
+  SharedPreferences? prefs;
   @override
   void dispose() {
     // TODO: implement dispose
@@ -140,25 +141,29 @@ class _HelpScreenState extends State<HelpScreen> {
       emailPassword = _credential.data()['password'];
     });
 
-    var options = new GmailSmtpOptions()
-      ..username = emailAddress
-      ..password = emailPassword;
-    var emailTransport = new SmtpTransport(options);
+    var options = gmail(emailAddress, emailPassword);
+    // ..username = emailAddress!
+    // ..password = emailPassword!;
 
     // Create our mail/envelope.
-    var envelope = new Envelope()
+    var message = new Message()
       ..from = 'noreply@city-loads.com'
       ..recipients.add('info@city-loads.com')
-      ..replyTos = [emailController.text]
+      ..envelopeTos = [emailController.text]
       ..subject = 'Help Inquiry: ${subjectController.text}'
       ..html =
           '<div><strong>From: </strong>${emailController.text}</div><div><strong>Message: </strong>${concernController.text}</div>';
 
+    try {
+      var sendReport = await send(message, options);
+      print('Message sent: ' + sendReport.toString());
+    } on MailerException catch (e) {
+      print('Message not sent.');
+      for (var p in e.problems) {
+        print('Problem: ${p.code}: ${p.msg}');
+      }
+    }
     // Email it.
-    emailTransport
-        .send(envelope)
-        .then((envelope) {})
-        .catchError((e) => print('Error occurred: $e'));
 
     Fluttertoast.showToast(
       msg:

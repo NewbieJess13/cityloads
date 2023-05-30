@@ -3,9 +3,9 @@ import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:ionicons/ionicons.dart';
 
 class Terms extends StatelessWidget {
-  final String terms;
+  final String? terms;
 
-  const Terms({Key key, this.terms}) : super(key: key);
+  const Terms({Key? key, this.terms}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     return Scaffold(

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
 class User extends ChangeNotifier {
-  String id;
-  String firstName;
-  String lastName;
-  String email;
-  String photoUrl;
-  bool emailNotifications;
+  String? id;
+  String? firstName;
+  String? lastName;
+  String? email;
+  String? photoUrl;
+  bool? emailNotifications;
 
   User(
       {this.id,

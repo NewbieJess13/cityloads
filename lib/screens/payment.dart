@@ -1,8 +1,9 @@
+import 'package:credit_card_validator/credit_card_validator.dart';
 import 'package:flutter_cupertino_datetime_picker/flutter_cupertino_datetime_picker.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:credit_card_validate/credit_card_validate.dart';
+// import 'package:credit_card_validate/credit_card_validate.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ionicons/ionicons.dart';
@@ -10,32 +11,32 @@ import './loader.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Payment extends StatefulWidget {
-  final Map<String, dynamic> creditCard;
-  const Payment({Key key, this.creditCard}) : super(key: key);
+  final Map<String, dynamic>? creditCard;
+  const Payment({Key? key, this.creditCard}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _PaymentState();
 }
 
 class _PaymentState extends State<Payment> {
-  Map<String, dynamic> creditCard;
-  String userId;
+  Map<String, dynamic>? creditCard;
+  String? userId;
   final cardholderNameFocus = FocusNode();
   final cardNumberFocus = FocusNode();
   final cvvFocus = FocusNode();
   final dateFocus = FocusNode();
-  String cardholderName = '';
-  String cardNumber = '';
-  String cvv = '';
+  String? cardholderName = '';
+  String? cardNumber = '';
+  String? cvv = '';
   String date = '';
   TextEditingController cardHolderNameController = TextEditingController();
   TextEditingController cardNumberController = TextEditingController();
   TextEditingController cvvController = TextEditingController();
   TextEditingController dateController = TextEditingController();
-  String cardType = '';
+  String? cardType = '';
   bool isLoading = false;
   String loadingText = '';
-  SharedPreferences prefs;
+  late SharedPreferences prefs;
 
   @override
   initState() {
@@ -43,14 +44,14 @@ class _PaymentState extends State<Payment> {
     creditCard = widget.creditCard;
     if (creditCard != null) {
       setState(() {
-        cardholderName = creditCard['cardholderName'];
-        cardNumber = creditCard['cardNumber'];
-        cvv = creditCard['cvv'];
-        date = '${creditCard['month']}/${creditCard['year']}';
-        cardType = creditCard['cardType'];
-        cardHolderNameController.text = cardholderName;
-        cardNumberController.text = cardNumber;
-        cvvController.text = cvv;
+        cardholderName = creditCard!['cardholderName'];
+        cardNumber = creditCard!['cardNumber'];
+        cvv = creditCard!['cvv'];
+        date = '${creditCard!['month']}/${creditCard!['year']}';
+        cardType = creditCard!['cardType'];
+        cardHolderNameController.text = cardholderName!;
+        cardNumberController.text = cardNumber!;
+        cvvController.text = cvv!;
         dateController.text = date;
       });
     }
@@ -208,8 +209,10 @@ class _PaymentState extends State<Payment> {
                                         onChanged: (String value) {
                                           cardNumber = value.trim();
                                           setState(() {
-                                            cardType = CreditCardValidator
-                                                .identifyCardBrand(cardNumber);
+                                            cardType = validator
+                                                .validateCCNum(cardNumber!)
+                                                .ccType
+                                                .toString();
                                           });
                                         })),
                                 Row(
@@ -357,11 +360,12 @@ class _PaymentState extends State<Payment> {
     });
   }
 
+  CreditCardValidator validator = CreditCardValidator();
   validate() {
-    if (cardholderName.isNotEmpty &&
-        cardNumber.isNotEmpty &&
-        cvv.isNotEmpty &&
-        CreditCardValidator.isCreditCardValid(cardNumber: cardNumber) &&
+    if (cardholderName!.isNotEmpty &&
+        cardNumber!.isNotEmpty &&
+        cvv!.isNotEmpty &&
+        validator.validateCCNum(cardNumber!).isValid &&
         date.isNotEmpty) {
       List dateParts = date.split('/');
       Map<String, dynamic> cardData = {
@@ -374,12 +378,11 @@ class _PaymentState extends State<Payment> {
       };
       createCard(cardData);
     } else {
-      if (cardholderName.isEmpty) {
+      if (cardholderName!.isEmpty) {
         cardholderNameFocus.requestFocus();
-      } else if (cardNumber.isEmpty) {
+      } else if (cardNumber!.isEmpty) {
         cardNumberFocus.requestFocus();
-      } else if (!CreditCardValidator.isCreditCardValid(
-          cardNumber: cardNumber)) {
+      } else if (!validator.validateCCNum(cardNumber!).isValid) {
         cardNumberFocus.requestFocus();
         Fluttertoast.showToast(
             msg: "Invalid card number.",
@@ -389,7 +392,7 @@ class _PaymentState extends State<Payment> {
             backgroundColor: Colors.red,
             textColor: Colors.white,
             fontSize: 16.0);
-      } else if (cvv.isEmpty) {
+      } else if (cvv!.isEmpty) {
         cvvFocus.requestFocus();
       } else if (date.isEmpty) {
         openDatePicker();
@@ -415,9 +418,9 @@ class _PaymentState extends State<Payment> {
     if (creditCard != null) {
       await FirebaseFirestore.instance
           .collection('creditCards')
-          .doc(creditCard['id'])
+          .doc(creditCard!['id'])
           .update(newCardPostData);
-      newCardPostData['id'] = creditCard['id'];
+      newCardPostData['id'] = creditCard!['id'];
       Navigator.of(context).pop(newCardPostData);
     } else {
       newCardPostData['userId'] = userId;
@@ -425,7 +428,7 @@ class _PaymentState extends State<Payment> {
           FirebaseFirestore.instance.collection('creditCards');
       DocumentReference card = await creditCards.add(newCardPostData);
       DocumentSnapshot newCard = await card.get();
-      Map<String, dynamic> newCardData = newCard.data();
+      Map<String, dynamic> newCardData = newCard.data() as Map<String, dynamic>;
       newCardData['id'] = newCard.id;
       Navigator.of(context).pop(newCardData);
     }

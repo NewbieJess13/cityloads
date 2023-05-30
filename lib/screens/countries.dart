@@ -22,8 +22,8 @@ class Countries extends StatefulWidget {
 }
 
 class _CountriesState extends State<Countries> {
-  Map<String, dynamic> apiResult;
-  List<DocumentSnapshot> queryPosts;
+  late Map<String, dynamic> apiResult;
+  late List<DocumentSnapshot> queryPosts;
   List searchResultWithImage = [];
   List<CountryInfo> countryLists = [];
   TextEditingController searchBox = TextEditingController();
@@ -68,7 +68,7 @@ class _CountriesState extends State<Countries> {
   void _handleList(List<CountryInfo> list) {
     if (list.isEmpty) return;
     for (int i = 0, length = list.length; i < length; i++) {
-      String pinyin = PinyinHelper.getPinyinE(list[i].name);
+      String pinyin = PinyinHelper.getPinyinE(list[i].name!);
       String tag = pinyin.substring(0, 1).toUpperCase();
       list[i].namePinyin = pinyin;
       if (RegExp("[A-Z]").hasMatch(tag)) {
@@ -113,10 +113,10 @@ class _CountriesState extends State<Countries> {
     }
   }
 
-  List<dynamic> getPostsByCountry(String countryCode) {
-    List countryPosts = [];
+  List<Map<String, dynamic>> getPostsByCountry(String? countryCode) {
+    List<Map<String, dynamic>> countryPosts = [];
     for (int i = 0; i < queryPosts.length; i++) {
-      Map<String, dynamic> post = queryPosts[i].data();
+      Map<String, dynamic> post = queryPosts[i].data() as Map<String, dynamic>;
       if (post['mappedAddress'] != null) {
         if (post['mappedAddress']['isoCountryCode'] == countryCode) {
           countryPosts.add(post['mappedAddress']);
@@ -124,7 +124,7 @@ class _CountriesState extends State<Countries> {
       }
     }
 
-    return countryPosts ?? [];
+    return countryPosts;
   }
 
   String panelAction = 'See all countries';
@@ -255,7 +255,8 @@ class _CountriesState extends State<Countries> {
                     List<CountryInfo> country = countryLists;
                     return GestureDetector(
                       onTap: () {
-                        List cities = getPostsByCountry(country[index].iso2);
+                        List<Map<String, dynamic>> cities =
+                            getPostsByCountry(country[index].iso2);
                         Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (context) => Home(
@@ -273,7 +274,7 @@ class _CountriesState extends State<Countries> {
                           vertical: 5,
                         ),
                         child: Text(
-                          country[index].name.toUpperCase(),
+                          country[index].name!.toUpperCase(),
                           style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w700,
@@ -353,11 +354,11 @@ class _CountriesState extends State<Countries> {
 }
 
 class CountryCard extends StatelessWidget {
-  final String flagUrl;
-  final String countryName;
-  final String cityCount;
+  final String? flagUrl;
+  final String? countryName;
+  final String? cityCount;
   const CountryCard({
-    Key key,
+    Key? key,
     this.flagUrl,
     this.countryName,
     this.cityCount,
@@ -369,7 +370,7 @@ class CountryCard extends StatelessWidget {
       child: Stack(
         children: [
           CachedNetworkImage(
-            imageUrl: flagUrl,
+            imageUrl: flagUrl!,
             fit: BoxFit.cover,
             width: double.infinity,
             height: double.infinity,
@@ -401,7 +402,7 @@ class CountryCard extends StatelessWidget {
                   child: Padding(
                     padding: EdgeInsets.symmetric(horizontal: 30),
                     child: Text(
-                      countryName,
+                      countryName!,
                       overflow: TextOverflow.clip,
                       textAlign: TextAlign.center,
                       style: TextStyle(

@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class NumberPicker extends StatefulWidget {
-  final int value;
-  final Function onChange;
+  final int? value;
+  final Function? onChange;
 
-  const NumberPicker({Key key, this.value, this.onChange}) : super(key: key);
+  const NumberPicker({Key? key, this.value, this.onChange}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _NumberPickerState();
@@ -17,7 +17,7 @@ class _NumberPickerState extends State<NumberPicker> {
   @override
   initState() {
     super.initState();
-    value = widget.value;
+    value = widget.value!;
   }
 
   @override
@@ -38,7 +38,7 @@ class _NumberPickerState extends State<NumberPicker> {
               {
                 setState(() {
                   value--;
-                  widget.onChange(value);
+                  widget.onChange!(value);
                 })
               }
           },
@@ -61,7 +61,7 @@ class _NumberPickerState extends State<NumberPicker> {
           onPressed: () => {
             setState(() {
               value++;
-              widget.onChange(value);
+              widget.onChange!(value);
             })
           },
         ),

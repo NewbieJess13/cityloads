@@ -22,14 +22,14 @@ import './post.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Home extends StatefulWidget {
-  final String city;
-  final String isoCode;
-  final List cities;
+  final String? city;
+  final String? isoCode;
+  final List<Map<String, dynamic>>? cities;
   final int selection;
-  final String countryName;
+  final String? countryName;
 
   const Home(
-      {Key key,
+      {Key? key,
       this.city,
       this.isoCode,
       this.selection = 0,
@@ -45,16 +45,16 @@ class _HomeState extends State<Home> {
   final FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
-  DarwinNotificationDetails iOSPlatformChannelSpecifics;
-  NotificationDetails platformChannelSpecifics;
-  InitializationSettings initializationSettings;
-  DarwinInitializationSettings initializationSettingsIOS;
-  AndroidNotificationDetails androidPlatformChannelSpecifics;
-  AndroidInitializationSettings initializationSettingsAndroid;
+  DarwinNotificationDetails? iOSPlatformChannelSpecifics;
+  NotificationDetails? platformChannelSpecifics;
+  late InitializationSettings initializationSettings;
+  DarwinInitializationSettings? initializationSettingsIOS;
+  AndroidNotificationDetails? androidPlatformChannelSpecifics;
+  AndroidInitializationSettings? initializationSettingsAndroid;
   int _selectedIndex = 0;
-  SharedPreferences prefs;
-  String userId;
-  String currentScreen;
+  late SharedPreferences prefs;
+  String? userId;
+  String? currentScreen;
   GlobalKey<FeedState> globalKey = GlobalKey();
 
   int _selection = 0;
@@ -97,7 +97,7 @@ class _HomeState extends State<Home> {
   Future<void> setupInteractedMessage() async {
     // Get any messages which caused the application to open from
     // a terminated state.
-    RemoteMessage initialMessage =
+    RemoteMessage? initialMessage =
         await FirebaseMessaging.instance.getInitialMessage();
 
     // If the message also contains a data property with a "type" of "chat",
@@ -194,7 +194,7 @@ class _HomeState extends State<Home> {
           content = Countries();
         } else if (widget.selection == 1) {
           content = Cities(
-            cities: widget.cities,
+            cities: widget.cities!,
             countryCode: widget.isoCode,
             countryName: widget.countryName,
           );
@@ -235,21 +235,21 @@ class _HomeState extends State<Home> {
   }
 
   newPostDialog() async {
-    bool goToFeed = await Navigator.push(
+    bool? goToFeed = await Navigator.push(
       context,
       MaterialPageRoute(
           builder: (context) => CreatePost(), fullscreenDialog: true),
     );
 
     if (goToFeed == true) {
-      globalKey.currentState.getPosts();
+      globalKey.currentState!.getPosts();
     }
   }
 
   notificationsListener() async {
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       if (message.notification != null) {
-        notify(message.notification.toMap());
+        notify(message.notification!.toMap());
       }
     });
   }
@@ -257,21 +257,21 @@ class _HomeState extends State<Home> {
   notify(Map<String, dynamic> message) async {
     // print(message);
     if (Platform.isIOS) {
-      final bool result = await flutterLocalNotificationsPlugin
+      final bool result = (await flutterLocalNotificationsPlugin
           .resolvePlatformSpecificImplementation<
               IOSFlutterLocalNotificationsPlugin>()
           ?.requestPermissions(
             alert: true,
             badge: true,
             sound: true,
-          );
+          ))!;
       if (result) {
         var notification = message['notification'];
         if (notification == null && message['aps'] != null) {
           notification = message['aps']['alert'];
         }
         bool showNotification = true;
-        String currentScreen = prefs.getString('currentScreen');
+        String? currentScreen = prefs.getString('currentScreen');
         if (message['type'] == 'new_message') {
           var conversation = jsonDecode(message["conversation"]);
           if (currentScreen == 'messages-${conversation["id"]}') {
@@ -296,7 +296,7 @@ class _HomeState extends State<Home> {
         notification = message['aps']['alert'];
       }
       bool showNotification = true;
-      String currentScreen = prefs.getString('currentScreen');
+      String? currentScreen = prefs.getString('currentScreen');
       if (message['type'] == 'new_message') {
         var conversation = jsonDecode(message["conversation"]);
         if (currentScreen == 'messages-${conversation["id"]}') {
@@ -319,7 +319,7 @@ class _HomeState extends State<Home> {
 
   Future onSelectNotification(NotificationResponse response) async {
     if (response.payload != null) {
-      var notification = jsonDecode(response.payload);
+      var notification = jsonDecode(response.payload!);
       print(notification);
       if (Platform.isAndroid) {
         notification = notification['data'];
@@ -336,7 +336,7 @@ class _HomeState extends State<Home> {
   }
 
   goToPost(String postData) {
-    String currentScreen = prefs.getString('currentScreen');
+    String? currentScreen = prefs.getString('currentScreen');
     PostModel.Post post = PostModel.Post.fromJson(jsonDecode(postData));
     if (currentScreen != 'post-${post.id}') {
       post.scrollToComments = true;
@@ -351,7 +351,7 @@ class _HomeState extends State<Home> {
   }
 
   goToMessages(String conversationData) {
-    String currentScreen = prefs.getString('currentScreen');
+    String? currentScreen = prefs.getString('currentScreen');
     Conversation conversation =
         Conversation.fromJson(jsonDecode(conversationData));
     if (currentScreen != 'messages-${conversation.id}') {

@@ -11,31 +11,30 @@ import 'package:provider/provider.dart';
 import 'dart:ui';
 
 class NewsCard extends StatefulWidget {
-  final Article article;
-  final String userId;
+  final Article? article;
+  final String? userId;
 
-  const NewsCard({Key key, this.article, this.userId}) : super(key: key);
+  const NewsCard({Key? key, this.article, this.userId}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _NewsCardState();
 }
 
 class _NewsCardState extends State<NewsCard> {
-  Article article;
-  String formattedDate;
-  Uri source;
-  bool isLoading = true;
+  Article? article;
+  String? formattedDate;
+  late Uri source;
 
   @override
   void initState() {
     super.initState();
     article = widget.article;
-    getInfo();
+    // getInfo();
     getFavorite();
 
-    final pubDate = parseHttpDate(article.pubDate);
-    formattedDate = Jiffy(pubDate).yMMMMd;
-    source = Uri.parse(article.url);
+    final pubDate = parseHttpDate(article!.pubDate!);
+    formattedDate = Jiffy.parseFromDateTime(pubDate).yMMMMd;
+    source = Uri.parse(article!.url!);
   }
 
   @override
@@ -58,7 +57,7 @@ class _NewsCardState extends State<NewsCard> {
             InkWell(
               onTap: () {
                 try {
-                  launchUrl(Uri.parse(article.url));
+                  launchUrl(Uri.parse(article!.url!));
                 } catch (e) {}
               },
               child: Column(
@@ -71,59 +70,49 @@ class _NewsCardState extends State<NewsCard> {
                         Stack(
                           children: [
                             Container(
-                              child: isLoading
-                                  ? Container(
-                                      height: 200.0,
+                              child: article!.photoUrl == null
+                                  ? Image.asset(
+                                      'assets/images/google_news_512.png',
+                                      height: 200,
+                                      width: MediaQuery.of(context).size.width,
+                                      fit: BoxFit.cover,
+                                      //color: Colors.black,
                                     )
-                                  : article.photoUrl == null
-                                      ? Image.asset(
-                                          'assets/images/placeholder.png',
-                                          height: 200,
-                                          width:
-                                              MediaQuery.of(context).size.width,
-                                          fit: BoxFit.cover,
-                                          //color: Colors.black,
-                                        )
-                                      : CachedNetworkImage(
-                                          height: 200.0,
-                                          width:
-                                              MediaQuery.of(context).size.width,
-                                          imageUrl: article.photoUrl,
-                                          placeholder: (context, url) => Center(
-                                            child: SizedBox(
-                                                height: 20.0,
-                                                width: 20.0,
-                                                child:
-                                                    CircularProgressIndicator(
-                                                  strokeWidth: 1,
-                                                  valueColor:
-                                                      AlwaysStoppedAnimation<
-                                                              Color>(
-                                                          Theme.of(context)
-                                                              .primaryColor),
-                                                )),
-                                          ),
-                                          imageBuilder:
-                                              (context, imageProvider) =>
-                                                  Container(
-                                            decoration: BoxDecoration(
-                                              color: Colors.black,
-                                              image: DecorationImage(
-                                                  image: imageProvider,
-                                                  fit: BoxFit.cover),
-                                            ),
-                                          ),
-                                          errorWidget: (context, url, error) =>
-                                              Image.asset(
-                                            'assets/images/placeholder.png',
-                                            height: 200,
-                                            width: MediaQuery.of(context)
-                                                .size
-                                                .width,
-                                            fit: BoxFit.cover,
-                                            //color: Colors.black,
-                                          ),
+                                  : CachedNetworkImage(
+                                      height: 200.0,
+                                      width: MediaQuery.of(context).size.width,
+                                      imageUrl: article!.photoUrl!,
+                                      placeholder: (context, url) => Center(
+                                        child: SizedBox(
+                                            height: 20.0,
+                                            width: 20.0,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 1,
+                                              valueColor:
+                                                  AlwaysStoppedAnimation<Color>(
+                                                      Theme.of(context)
+                                                          .primaryColor),
+                                            )),
+                                      ),
+                                      imageBuilder: (context, imageProvider) =>
+                                          Container(
+                                        decoration: BoxDecoration(
+                                          color: Colors.black,
+                                          image: DecorationImage(
+                                              image: imageProvider,
+                                              fit: BoxFit.cover),
                                         ),
+                                      ),
+                                      errorWidget: (context, url, error) =>
+                                          Image.asset(
+                                        'assets/images/placeholder.png',
+                                        height: 200,
+                                        width:
+                                            MediaQuery.of(context).size.width,
+                                        fit: BoxFit.cover,
+                                        //color: Colors.black,
+                                      ),
+                                    ),
                             ),
                             Container(
                               height: 200,
@@ -154,7 +143,8 @@ class _NewsCardState extends State<NewsCard> {
                                       value: article,
                                       child: Consumer<Article>(
                                           builder: (context, value, child) {
-                                        return article.isFavoriteLoading == true
+                                        return article!.isFavoriteLoading ==
+                                                true
                                             ? Padding(
                                                 padding: EdgeInsets.only(
                                                     right: 15.0, top: 15.0),
@@ -176,12 +166,13 @@ class _NewsCardState extends State<NewsCard> {
                                                 },
                                                 splashRadius: 20.0,
                                                 icon: Icon(
-                                                  article.favoriteNewsId != null
+                                                  article!.favoriteNewsId !=
+                                                          null
                                                       ? Ionicons.bookmark
                                                       : Ionicons
                                                           .bookmark_outline,
                                                   color:
-                                                      article.favoriteNewsId !=
+                                                      article!.favoriteNewsId !=
                                                               null
                                                           ? Colors.red
                                                           : Colors.white,
@@ -205,7 +196,7 @@ class _NewsCardState extends State<NewsCard> {
                                     child: Consumer<Article>(
                                         builder: (context, value, child) {
                                       return Text(
-                                        article.title,
+                                        article!.title!,
                                         overflow: TextOverflow.ellipsis,
                                         maxLines: 3,
                                         style: TextStyle(
@@ -232,7 +223,7 @@ class _NewsCardState extends State<NewsCard> {
                                     child: Consumer<Article>(
                                         builder: (context, value, child) {
                                       return Text(
-                                        article.description,
+                                        article!.description!,
                                         overflow: TextOverflow.ellipsis,
                                         maxLines: 3,
                                         style: TextStyle(
@@ -295,92 +286,90 @@ class _NewsCardState extends State<NewsCard> {
                 ],
               ),
             ),
-            isLoading
-                ? Positioned.fill(
-                    child: BackdropFilter(
-                      filter: new ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
-                      child: new Container(
-                        decoration: BoxDecoration(
-                            color: Colors.grey.shade200.withOpacity(0.5)),
-                        child: Center(
-                          child: Center(
-                            child: SizedBox(
-                                height: 20.0,
-                                width: 20.0,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 1,
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                      Theme.of(context).primaryColor),
-                                )),
-                          ),
-                        ),
-                      ),
-                    ),
-                  )
-                : Container()
+            // Positioned.fill(
+            //   child: BackdropFilter(
+            //     filter: new ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
+            //     child: new Container(
+            //       decoration: BoxDecoration(
+            //           color: Colors.grey.shade200.withOpacity(0.5)),
+            //       child: Center(
+            //         child: Center(
+            //           child: SizedBox(
+            //               height: 20.0,
+            //               width: 20.0,
+            //               child: CircularProgressIndicator(
+            //                 strokeWidth: 1,
+            //                 valueColor: AlwaysStoppedAnimation<Color>(
+            //                     Theme.of(context).primaryColor),
+            //               )),
+            //         ),
+            //       ),
+            //     ),
+            //   ),
+            // )
           ],
         ),
       ),
     );
   }
 
-  getInfo() async {
-    InfoBase webInfo = await WebAnalyzer.getInfo(article.url);
+  // getInfo() async {
+  //   // InfoBase? webInfo = await WebAnalyzer.getInfo(article!.url);
 
-    if (webInfo is WebInfo) {
-      article.photoUrl = webInfo.image;
-      // if (webInfo.title != null &&
-      //     !webInfo.title
-      //         .contains(RegExp(r'Request unsuccessful', caseSensitive: false)))
-      //   article.title = webInfo.title;
-      // if (webInfo.description != null)
-      //   article.description = webInfo.description;
-      // article.update();
-      setState(() {
-        isLoading = false;
-      });
-    }
-  }
+  //   if (webInfo is WebInfo) {
+  //     article!.photoUrl = webInfo.image;
+  //     // if (webInfo.title != null &&
+  //     //     !webInfo.title
+  //     //         .contains(RegExp(r'Request unsuccessful', caseSensitive: false)))
+  //     //   article.title = webInfo.title;
+  //     // if (webInfo.description != null)
+  //     //   article.description = webInfo.description;
+  //     // article.update();
+  //     setState(() {
+  //       isLoading = false;
+  //     });
+  //   }
+  // }
 
   Future getFavorite() async {
     QuerySnapshot favoriteNews = await FirebaseFirestore.instance
         .collection('favoriteNews')
-        .where('url', isEqualTo: article.url)
+        .where('url', isEqualTo: article!.url)
         .where('userId', isEqualTo: widget.userId)
         .limit(1)
         .get();
 
     if (favoriteNews.docs.length > 0) {
-      article.favoriteNewsId = favoriteNews.docs[0].id;
-      article.update();
+      article!.favoriteNewsId = favoriteNews.docs[0].id;
+      article!.update();
     }
   }
 
   toggleFavorite() async {
-    article.isFavoriteLoading = true;
-    article.update();
+    article!.isFavoriteLoading = true;
+    article!.update();
     CollectionReference favoriteNews =
         FirebaseFirestore.instance.collection('favoriteNews');
-    String favoriteNewsId;
-    if (article.favoriteNewsId == null) {
+    String? favoriteNewsId;
+    if (article!.favoriteNewsId == null) {
       String timestamp = DateTime.now().millisecondsSinceEpoch.toString();
       DocumentReference newFavoriteNews = await favoriteNews.add({
         'userId': widget.userId,
-        'url': article.url,
-        'title': article.title,
-        'description': article.description,
-        'photoUrl': article.photoUrl,
-        'pubDate': article.pubDate,
+        'url': article!.url,
+        'title': article!.title,
+        'description': article!.description,
+        'photoUrl': article!.photoUrl,
+        'pubDate': article!.pubDate,
         'timestamp': timestamp
       });
       favoriteNewsId = newFavoriteNews.id;
     } else {
       favoriteNewsId = null;
-      await favoriteNews.doc(article.favoriteNewsId).delete();
+      await favoriteNews.doc(article!.favoriteNewsId).delete();
     }
 
-    article.favoriteNewsId = favoriteNewsId;
-    article.isFavoriteLoading = false;
-    article.update();
+    article!.favoriteNewsId = favoriteNewsId;
+    article!.isFavoriteLoading = false;
+    article!.update();
   }
 }

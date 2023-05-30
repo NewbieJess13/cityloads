@@ -7,7 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter_tags/flutter_tags.dart';
+import 'package:flutter_tags_x/flutter_tags_x.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:flutter_range_slider_ns/flutter_range_slider_ns.dart' as frs;
 import 'package:provider/provider.dart';
@@ -22,9 +22,9 @@ import 'dart:convert';
 class Feed extends StatefulWidget {
   // final String currentUserId;
   // Feed({Key key, @required this.currentUserId}) : super(key: key);
-  final String city;
-  final String isoCode;
-  Feed({Key key, this.city, this.isoCode}) : super(key: key);
+  final String? city;
+  final String? isoCode;
+  Feed({Key? key, this.city, this.isoCode}) : super(key: key);
   @override
   State<StatefulWidget> createState() => FeedState();
 }
@@ -33,21 +33,21 @@ class FeedState extends State<Feed> {
   bool postsLoading = true;
   bool postUsersLoading = true;
   bool postFavoritesLoading = true;
-  String userId;
-  SharedPreferences prefs;
+  String? userId;
+  late SharedPreferences prefs;
   GoogleSignIn googleSignIn = GoogleSignIn(
     scopes: [
       'email',
     ],
   );
-  FirebaseAuth firebaseAuth;
+  FirebaseAuth? firebaseAuth;
   final GlobalKey<TagsState> _tagStateKey = GlobalKey<TagsState>();
   final GlobalKey<TagsState> _searchTagStateKey = GlobalKey<TagsState>();
   TextEditingController searchLocationController = TextEditingController();
 
-  List searchTags;
+  late List searchTags;
 
-  List types;
+  late List types;
   Map<String, dynamic> search = {
     'location': '',
     'lowerYear': '1',
@@ -163,7 +163,7 @@ class FeedState extends State<Feed> {
       getPosts();
   }
 
-  getPostsFromCountrySelector(String city, String countryCode) async {
+  getPostsFromCountrySelector(String? city, String? countryCode) async {
     setState(() {
       posts = [];
       postsLoading = true;
@@ -175,7 +175,7 @@ class FeedState extends State<Feed> {
         await FirebaseFirestore.instance.collectionGroup('posts').get();
     final List<DocumentSnapshot> queryPosts = result.docs;
     for (int i = 0; i < queryPosts.length; i++) {
-      Map<String, dynamic> post = queryPosts[i].data();
+      Map<String, dynamic> post = queryPosts[i].data() as Map<String, dynamic>;
       if (post['mappedAddress'] != null) {
         if (post['mappedAddress']['isoCountryCode'] == countryCode &&
             post['mappedAddress']['locality'] == city) {
@@ -186,7 +186,7 @@ class FeedState extends State<Feed> {
 
           post['documentSnapshot'] = queryPosts[i];
           post['id'] = queryPosts[i].id;
-          post['userId'] = queryPosts[i].reference.parent.parent.id;
+          post['userId'] = queryPosts[i].reference.parent.parent!.id;
           post['isFavorite'] = null;
           post['isFavoriteLoading'] = false;
           post['types'] = jsonEncode(post['types']);
@@ -219,7 +219,7 @@ class FeedState extends State<Feed> {
     }
   }
 
-  getPosts([Map<String, dynamic> searchQuery]) async {
+  getPosts([Map<String, dynamic>? searchQuery]) async {
     setState(() {
       posts = [];
       postsLoading = true;
@@ -231,13 +231,14 @@ class FeedState extends State<Feed> {
         await FirebaseFirestore.instance.collectionGroup('posts').get();
     final List<DocumentSnapshot> queryPosts = result.docs;
     for (int i = 0; i < queryPosts.length; i++) {
-      Map<String, dynamic> post = queryPosts[i].data();
+      Map<String, dynamic>? post =
+          queryPosts[i].data() as Map<String, dynamic>?;
       if (searchQuery != null) {
-        double postPrice = double.parse(post['price']);
+        double postPrice = double.parse(post!['price']);
         int postYear = int.parse(post['year']);
-        int postRooms = post['bedrooms'];
-        int postBaths = post['baths'];
-        bool maid = post['maid'];
+        int? postRooms = post['bedrooms'];
+        int? postBaths = post['baths'];
+        bool? maid = post['maid'];
 
         final f = DateFormat('y');
         int yearNow = int.parse(f.format(DateTime.now()));
@@ -278,9 +279,9 @@ class FeedState extends State<Feed> {
             !interiorFound) continue;
       }
 
-      post['documentSnapshot'] = queryPosts[i];
+      post!['documentSnapshot'] = queryPosts[i];
       post['id'] = queryPosts[i].id;
-      post['userId'] = queryPosts[i].reference.parent.parent.id;
+      post['userId'] = queryPosts[i].reference.parent.parent!.id;
       post['isFavorite'] = null;
       post['isFavoriteLoading'] = false;
       post['types'] = jsonEncode(post['types']);
@@ -383,7 +384,7 @@ class FeedState extends State<Feed> {
       builder: (context,
           AsyncSnapshot<DocumentSnapshot<Map<String, dynamic>>> snapshot) {
         if (snapshot.hasData &&
-            snapshot.data.data()['isOnline'] == true &&
+            snapshot.data!.data()!['isOnline'] == true &&
             post.userId != userId) {
           return Positioned(
             bottom: 0.0,
@@ -407,15 +408,12 @@ class FeedState extends State<Feed> {
   }
 
   Widget buildItem(PostModel.Post post) {
-    Widget profilePicture = (post.userPhotoUrl != null)
-        ? CircleAvatar(
-            radius: 20.0,
-            backgroundImage: CachedNetworkImageProvider(post.userPhotoUrl),
-          )
-        : CircleAvatar(
-            radius: 20.0,
-            backgroundImage: AssetImage('assets/images/logo.png'),
-          );
+    Widget profilePicture = CircleAvatar(
+      radius: 20.0,
+      backgroundImage: post.userPhotoUrl != null
+          ? CachedNetworkImageProvider(post.userPhotoUrl!)
+          : AssetImage('assets/images/logo.png') as ImageProvider,
+    );
 
     return ChangeNotifierProvider.value(
       value: post,
@@ -446,7 +444,7 @@ class FeedState extends State<Feed> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    post.userFullName,
+                                    post.userFullName ?? '',
                                     style: TextStyle(
                                         fontWeight: FontWeight.w700,
                                         fontSize: 17.0),
@@ -525,7 +523,7 @@ class FeedState extends State<Feed> {
                     CachedNetworkImage(
                       width: MediaQuery.of(context).size.width,
                       height: 170.0,
-                      imageUrl: post.images[0],
+                      imageUrl: post.images![0],
                       imageBuilder: (context, imageProvider) => Container(
                         decoration: BoxDecoration(
                           image: DecorationImage(
@@ -535,7 +533,7 @@ class FeedState extends State<Feed> {
                         ),
                       ),
                     ),
-                    post.images.length > 1
+                    post.images!.length > 1
                         ? Positioned(
                             top: 10.0,
                             right: 10.0,
@@ -547,7 +545,7 @@ class FeedState extends State<Feed> {
                                   borderRadius: BorderRadius.circular(5.0)),
                               child: Row(
                                 children: [
-                                  Text(post.images.length.toString() + ' ',
+                                  Text(post.images!.length.toString() + ' ',
                                       style: TextStyle(
                                           color: Colors.white,
                                           fontFamily: '',
@@ -576,13 +574,13 @@ class FeedState extends State<Feed> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      post.title,
+                      post.title ?? '',
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                           fontSize: 22.0, fontWeight: FontWeight.w700),
                     ),
                     Text(
-                      'Built in ' + post.year,
+                      'Built in ' + post.year!,
                       style: TextStyle(fontSize: 14.0, height: 1.5),
                     ),
                     const SizedBox(height: 3),
@@ -594,7 +592,7 @@ class FeedState extends State<Feed> {
                             child: Padding(
                           padding: EdgeInsets.only(left: 5.0),
                           child: Text(
-                            'For${post.availableFor == "rent" ? " " + post.rentPeriod : ""} ${post.availableFor}',
+                            'For${post.availableFor == "rent" ? " " + post.rentPeriod! : ""} ${post.availableFor}',
                             style: TextStyle(fontSize: 14.0, height: 1.5),
                           ),
                         ))
@@ -614,7 +612,7 @@ class FeedState extends State<Feed> {
                               child: Padding(
                             padding: EdgeInsets.only(left: 5.0),
                             child: Text(
-                              post.location,
+                              post.location!,
                               style: TextStyle(fontSize: 14.0, height: 1.5),
                             ),
                           ))
@@ -702,20 +700,20 @@ class FeedState extends State<Feed> {
       post.isFavoriteLoading = true;
     });
 
-    bool isFavorite;
+    bool? isFavorite;
     if (post.isFavorite == false) {
-      await post.documentSnapshot.reference
+      await post.documentSnapshot?.reference
           .collection('favorites')
           .add({'userId': userId});
       isFavorite = true;
     } else if (post.isFavorite == true) {
-      QuerySnapshot favorite = await post.documentSnapshot.reference
+      QuerySnapshot favorite = await post.documentSnapshot!.reference
           .collection('favorites')
           .where('userId', isEqualTo: userId)
           .get();
       List<QueryDocumentSnapshot> favoritesResult = favorite.docs;
       for (int i = 0; i < favoritesResult.length; i++) {
-        await post.documentSnapshot.reference
+        await post.documentSnapshot!.reference
             .collection('favorites')
             .doc(favoritesResult[i].id)
             .delete();
@@ -723,17 +721,17 @@ class FeedState extends State<Feed> {
       isFavorite = false;
     }
 
-    post.isFavorite = isFavorite;
+    post.isFavorite = isFavorite!;
     post.isFavoriteLoading = false;
     post.update();
   }
 
   Widget postAttributes(PostModel.Post post) {
     List<Widget> attributes = [];
-    int bedrooms = post.bedrooms;
-    int baths = post.baths;
-    bool parking = post.parking;
-    int floors = post.floors;
+    int bedrooms = post.bedrooms!;
+    int baths = post.baths!;
+    bool parking = post.parking!;
+    int floors = post.floors!;
 
     attributes.add(Column(
       children: [
@@ -751,7 +749,7 @@ class FeedState extends State<Feed> {
         Container(
           margin: EdgeInsets.only(top: 5.0, bottom: 8.0),
           child: Text(
-            post.size + ' sqft',
+            post.size! + ' sqft',
             style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15.0),
           ),
         ),
@@ -873,7 +871,7 @@ class FeedState extends State<Feed> {
 
   String parseTimestamp(timestamp) {
     DateTime date = DateTime.fromMillisecondsSinceEpoch(int.parse(timestamp));
-    return Jiffy(date).fromNow();
+    return Jiffy.parseFromDateTime(date).fromNow();
   }
 
   goToPost(PostModel.Post post) {
@@ -1567,7 +1565,7 @@ class FeedState extends State<Feed> {
     );
   }
 
-  resetSearch([bool refresh]) {
+  resetSearch([bool? refresh]) {
     setState(() {
       search = {
         'location': '',

@@ -23,8 +23,6 @@ class _StatesState extends State<Cities> {
   bool loading = true;
   @override
   void initState() {
-    // TODO: implement initState
-    //print(widget.cities);
     getCities();
     super.initState();
   }

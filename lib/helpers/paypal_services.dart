@@ -11,6 +11,8 @@ class PaypalServices {
       var client = BasicAuthClient(clientId, secretKey);
       var response = await client.post(Uri.parse(
           '$paypalDomain/v1/oauth2/token?grant_type=client_credentials'));
+
+      print(response.statusCode);
       if (response.statusCode == 200) {
         final body = convert.jsonDecode(response.body);
         return body["access_token"];
@@ -35,6 +37,7 @@ class PaypalServices {
           });
       print(response.statusCode);
       final body = convert.jsonDecode(response.body);
+
       if (response.statusCode == 201) {
         if (body["links"] != null && body["links"].length > 0) {
           List links = body["links"];

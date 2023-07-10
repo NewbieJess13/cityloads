@@ -447,88 +447,86 @@ class _LoginState extends State<Login> {
 
   loginFacebook() async {
     final LoginResult result = await FacebookAuth.instance.login();
+    this.setState(() {
+      isLoading = true;
+    });
     if (result.status == LoginStatus.success) {
       final OAuthCredential credential =
           FacebookAuthProvider.credential(result.accessToken!.token);
+
+      final profile = await FacebookAuth.instance.getUserData();
       // Once signed in, return the UserCredential
-      return await FirebaseAuth.instance.signInWithCredential(credential);
+      print(profile);
+      User? firebaseUser =
+          (await FirebaseAuth.instance.signInWithCredential(credential)).user;
+      var photoUrl = profile['picture']['data']['url'];
+
+      if (firebaseUser != null) {
+        // Check if already signed up
+
+        final DocumentSnapshot<Map<String, dynamic>> userDoc =
+            await FirebaseFirestore.instance
+                .collection('users')
+                .doc(firebaseUser.uid)
+                .get();
+        Map<String, dynamic>? userData = userDoc.data();
+        if (userData == null) {
+          // Insert data to server if new user
+
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(firebaseUser.uid)
+              .set({
+            'id': firebaseUser.uid,
+            'firstName': profile['name'],
+            'lastName': '',
+            'email': profile['email'],
+            'loginType': 'facebook',
+            'photoUrl': photoUrl,
+            'emailNotifications': true
+          });
+          currentUser = firebaseUser;
+          final DocumentSnapshot userDoc = await FirebaseFirestore.instance
+              .collection('users')
+              .doc(firebaseUser.uid)
+              .get();
+          updateCfmToken(userDoc);
+          await prefs.setString('userId', currentUser.uid);
+          await prefs.setString('firstName', profile['name']);
+          await prefs.setString('lastName', '');
+          await prefs.setString('email', profile['email']);
+          await prefs.setString('loginType', 'facebook');
+          if (currentUser.photoURL != null) {
+            await prefs.setString('photoUrl', currentUser.photoURL!);
+          }
+        } else {
+          updateCfmToken(userDoc);
+          Map<String, dynamic>? userData = userDoc.data();
+          // Write data to local
+          if (userData != null) {
+            await prefs.setString('userId', userData['id']);
+            await prefs.setString('firstName', userData['firstName']);
+            await prefs.setString('lastName', '');
+            await prefs.setString('email', userData['email']);
+            await prefs.setString('loginType', userData['loginType']);
+            await prefs.setString('photoUrl', userData['photoUrl']);
+            await prefs.setBool(
+                'emailNotifications', userData['emailNotifications']);
+          }
+        }
+        Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (context) => Home()),
+            (Route<dynamic> route) => false);
+      } else {
+        this.setState(() {
+          isLoading = false;
+        });
+      }
+    } else {
+      this.setState(() {
+        isLoading = false;
+      });
     }
-    // final facebookLogin = FacebookLogin();
-    // final result = await facebookLogin.logIn(['email']);
-    // this.setState(() {
-    //   isLoading = true;
-    // });
-    // if (result.status == FacebookLoginStatus.loggedIn) {
-    //   var graphResponse = await http.get(Uri.parse(
-    //       'https://graph.facebook.com/v2.12/me?fields=first_name,last_name,email,picture&access_token=${result.accessToken.token}'));
-    //   var profile = json.decode(graphResponse.body);
-    //   var photoUrl = profile['picture']['data']['url'];
-
-    //   final FacebookAuthCredential credential =
-    //       FacebookAuthProvider.credential(result.accessToken.token);
-
-    //   User firebaseUser =
-    //       (await firebaseAuth.signInWithCredential(credential)).user;
-    //   if (firebaseUser != null) {
-    //     // Check if already signed up
-
-    //     final DocumentSnapshot userDoc = await FirebaseFirestore.instance
-    //         .collection('users')
-    //         .doc(firebaseUser.uid)
-    //         .get();
-    //     Map<String, dynamic> userData = userDoc.data();
-    //     if (userData == null) {
-    //       // Insert data to server if new user
-
-    //       await FirebaseFirestore.instance
-    //           .collection('users')
-    //           .doc(firebaseUser.uid)
-    //           .set({
-    //         'id': firebaseUser.uid,
-    //         'firstName': profile['first_name'],
-    //         'lastName': profile['last_name'],
-    //         'email': profile['email'],
-    //         'loginType': 'facebook',
-    //         'photoUrl': photoUrl
-    //       });
-    //       currentUser = firebaseUser;
-    //       final DocumentSnapshot userDoc = await FirebaseFirestore.instance
-    //           .collection('users')
-    //           .doc(firebaseUser.uid)
-    //           .get();
-    //       updateCfmToken(userDoc);
-    //       await prefs.setString('userId', currentUser.uid);
-    //       await prefs.setString('firstName', profile['first_name']);
-    //       await prefs.setString('lastName', profile['last_name']);
-    //       await prefs.setString('email', profile['email']);
-    //       await prefs.setString('loginType', profile['loginType']);
-    //       await prefs.setString('photoUrl', currentUser.photoURL);
-    //     } else {
-    //       updateCfmToken(userDoc);
-    //       Map<String, dynamic> userData = userDoc.data();
-    //       // Write data to local
-    //       await prefs.setString('userId', userData['id']);
-    //       await prefs.setString('firstName', userData['firstName']);
-    //       await prefs.setString('lastName', userData['lastName']);
-    //       await prefs.setString('email', userData['email']);
-    //       await prefs.setString('loginType', userData['loginType']);
-    //       await prefs.setString('photoUrl', userData['photoUrl']);
-    //       await prefs.setBool(
-    //           'emailNotifications', userData['emailNotifications']);
-    //     }
-    //     Navigator.of(context).pushAndRemoveUntil(
-    //         MaterialPageRoute(builder: (context) => Home()),
-    //         (Route<dynamic> route) => false);
-    //   } else {
-    //     this.setState(() {
-    //       isLoading = false;
-    //     });
-    //   }
-    // } else {
-    //   this.setState(() {
-    //     isLoading = false;
-    //   });
-    // }
   }
 
   loginGoogle() async {

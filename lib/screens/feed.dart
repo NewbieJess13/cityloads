@@ -1017,10 +1017,10 @@ class FeedState extends State<Feed> {
                               Container(
                                 child: frs.RangeSlider(
                                   showValueIndicator: true,
-                                  lowerValue: double.parse(search['lowerYear']),
-                                  min: 1,
-                                  upperValue: double.parse(search['upperYear']),
-                                  max: 100,
+                                  lowerValue: 0.2,
+                                  min: 0.1,
+                                  upperValue: .8,
+                                  max: 1,
                                   divisions: null,
                                   valueIndicatorFormatter: null,
                                   onChanged: (lowerValue, upperValue) {

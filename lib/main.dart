@@ -1,4 +1,3 @@
-import 'package:CityLoads/screens/countries.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -42,7 +41,9 @@ class MyApp extends StatelessWidget {
       title: 'City Loads',
       theme: ThemeData(
         primarySwatch: primaryColor,
-        buttonColor: primaryColor,
+        elevatedButtonTheme: ElevatedButtonThemeData(),
+        buttonTheme: ButtonThemeData(buttonColor: primaryColor),
+        // buttonColor: primaryColor,
         toggleableActiveColor: primaryColor,
         fontFamily: 'TexGyreAdventor',
         inputDecorationTheme: InputDecorationTheme(

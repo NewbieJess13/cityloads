@@ -51,8 +51,8 @@ class _SignupState extends State<Signup> {
       this.firebaseAuth = FirebaseAuth.instance;
     });
     DbFirestore().getPrivacyPolicy().then((data) {
-      privacyPolicy = data.data()['privacy_policy'];
-      terms = data.data()['terms'];
+      privacyPolicy = data.data()!['privacy_policy'];
+      terms = data.data()!['terms'];
     });
     super.initState();
   }
@@ -604,10 +604,10 @@ class _SignupState extends State<Signup> {
   sendWelcomeEmail(String email) async {
     String emailAddress = '';
     String emailPassword = '';
-    await DbFirestore().getAdminCredential().then((_credential) {
-      emailAddress = _credential.data()['email'];
-      emailPassword = _credential.data()['password'];
-    });
+    DocumentSnapshot<Map<String, dynamic>> _credential =
+        await DbFirestore().getAdminCredential();
+    emailAddress = _credential.data()!['email'];
+    emailPassword = _credential.data()!['password'];
 
     var options = gmail(emailAddress, emailPassword);
 

@@ -66,7 +66,9 @@ class _CreatePostState extends State<CreatePost> {
   ScrollController scrollController = ScrollController();
   TextEditingController yearController = TextEditingController();
   TextEditingController locationController = TextEditingController();
-
+  bool _isBackPressedOrTouchedOutSide = false,
+      _isDropDownOpened = false,
+      _isPanDown = false;
   List<Widget> imagePreviews = [];
   List images = [];
   late SharedPreferences prefs;
@@ -109,316 +111,266 @@ class _CreatePostState extends State<CreatePost> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        children: [
-          Container(
-            child: Scaffold(
-              backgroundColor: Colors.transparent,
-              appBar: AppBar(
-                automaticallyImplyLeading: false,
+    return GestureDetector(
+      onTap: _removeFocus,
+      onPanDown: (focus) {
+        _isPanDown = true;
+        _removeFocus();
+      },
+      child: Scaffold(
+        body: Stack(
+          children: [
+            Container(
+              child: Scaffold(
                 backgroundColor: Colors.transparent,
-                elevation: 0.0,
-                centerTitle: false,
-                title: Text('CREATE A POST',
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold,
+                appBar: AppBar(
+                  automaticallyImplyLeading: false,
+                  backgroundColor: Colors.transparent,
+                  elevation: 0.0,
+                  centerTitle: false,
+                  title: Text('CREATE A POST',
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                          fontSize: 18.0)),
+                  actions: [
+                    IconButton(
+                      onPressed: () => {Navigator.pop(context)},
+                      splashRadius: 20.0,
+                      icon: Icon(
+                        FontAwesomeIcons.times,
                         color: Colors.black,
-                        fontSize: 18.0)),
-                actions: [
-                  IconButton(
-                    onPressed: () => {Navigator.pop(context)},
-                    splashRadius: 20.0,
-                    icon: Icon(
-                      FontAwesomeIcons.times,
-                      color: Colors.black,
-                      size: 24.0,
-                    ),
-                  )
-                ],
-              ),
-              body: LayoutBuilder(builder:
-                  (BuildContext context, BoxConstraints viewportConstraints) {
-                return SingleChildScrollView(
-                  controller: scrollController,
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                        minHeight: viewportConstraints.maxHeight),
-                    child: GestureDetector(
-                      onTap: () => {hideKeyboard()},
-                      child: Padding(
-                        padding: EdgeInsets.all(20.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Container(
-                                child: TextField(
-                                    focusNode: titleFocus,
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.w700,
-                                        fontSize: 16.0),
-                                    decoration: InputDecoration(
-                                        labelStyle: TextStyle(
-                                            fontWeight: FontWeight.w300),
-                                        labelText: 'Title'),
-                                    onChanged: (String value) {
-                                      this.title = value.trim();
-                                    })),
-                            Container(
-                                margin: EdgeInsets.only(top: 15.0),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: <Widget>[
-                                    Expanded(
-                                      flex: 2,
-                                      child: Container(
-                                        margin: EdgeInsets.only(right: 5.0),
-                                        child: TextField(
-                                          keyboardType: TextInputType.datetime,
-                                          focusNode: yearFocus,
-                                          onTap: () => {openDatePicker()},
-                                          readOnly: true,
-                                          controller: yearController,
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.w700,
-                                              fontSize: 16.0),
-                                          decoration: InputDecoration(
-                                              labelStyle: TextStyle(
-                                                  fontWeight: FontWeight.w300),
-                                              labelText: 'Year built'),
-                                        ),
-                                      ),
-                                    ),
-                                    Expanded(
-                                      flex: 8,
-                                      child: Container(
-                                        margin: EdgeInsets.only(left: 5.0),
-                                        child: Row(
-                                          children: [
-                                            Expanded(
-                                              flex: 3,
-                                              child: AwesomeDropDown(
-                                                padding: 8,
-                                                dropDownList: [
-                                                  'USD',
-                                                  'EUR',
-                                                  'GBP',
-                                                  'CNY',
-                                                  'JPY',
-                                                  'AED',
-                                                  'SAR'
-                                                ],
-                                                onDropDownItemClick:
-                                                    (selectedItem) {
-                                                  selectedCurrency =
-                                                      selectedItem;
-                                                  print(selectedItem);
-                                                },
-                                              ),
-                                            ),
-                                            Expanded(
-                                              flex: 5,
-                                              child: TextField(
-                                                  keyboardType: TextInputType
-                                                      .numberWithOptions(
-                                                          decimal: true),
-                                                  focusNode: priceFocus,
-                                                  style: TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.w700,
-                                                      fontSize: 16.0),
-                                                  decoration: InputDecoration(
-                                                      labelStyle: TextStyle(
-                                                          fontWeight:
-                                                              FontWeight.w300),
-                                                      labelText: 'Price'),
-                                                  onChanged: (String value) {
-                                                    this.price = value.trim();
-                                                  }),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                )),
-                            Container(
-                                margin: EdgeInsets.only(top: 15.0),
-                                child: TextField(
-                                    focusNode: locationFocus,
-                                    onTap: () {
-                                      openMapPicker();
-                                    },
-                                    readOnly: true,
-                                    controller: locationController,
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.w700,
-                                        fontSize: 16.0),
-                                    decoration: InputDecoration(
-                                        suffixIcon: SvgPicture.asset(
-                                          'assets/icons/location.svg',
-                                          height: 10,
-                                          width: 10,
-                                          fit: BoxFit.none,
-                                        ),
-                                        labelStyle: TextStyle(
-                                            fontWeight: FontWeight.w300),
-                                        labelText: 'Location'),
-                                    onChanged: (String value) {
-                                      this.location = value.trim();
-                                    })),
-                            Container(
-                                margin: EdgeInsets.only(top: 15.0),
-                                child: TextField(
-                                    focusNode: descriptionFocus,
-                                    minLines: 1,
-                                    maxLines: 10,
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.w700,
-                                        fontSize: 16.0),
-                                    decoration: InputDecoration(
-                                        labelStyle: TextStyle(
-                                            fontWeight: FontWeight.w300),
-                                        labelText: 'Description'),
-                                    onChanged: (String value) {
-                                      this.description = value.trim();
-                                    })),
-                            Container(
-                                margin:
-                                    EdgeInsets.only(top: 30.0, bottom: 15.0),
-                                child: Text(
-                                  'IMAGES',
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 18.0),
-                                )),
-                            GridView.count(
-                              primary: false,
-                              shrinkWrap: true,
-                              crossAxisCount: 3,
-                              children: [...imagePreviews],
-                            ),
-                            Container(
-                                margin: EdgeInsets.only(bottom: 15.0),
-                                child: Text(
-                                  'TYPE',
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 18.0),
-                                )),
-                            typeTags(),
-                            Container(
-                                margin: EdgeInsets.only(top: 15.0),
-                                child: TextField(
-                                    keyboardType: TextInputType.number,
-                                    focusNode: sizeFocus,
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.w700,
-                                        fontSize: 16.0),
-                                    decoration: InputDecoration(
-                                        labelStyle: TextStyle(
-                                            fontWeight: FontWeight.w300),
-                                        labelText: 'Size in SQFT'),
-                                    onChanged: (String value) {
-                                      this.size = value.trim();
-                                    })),
-                            Container(
-                                margin:
-                                    EdgeInsets.only(top: 30.0, bottom: 15.0),
-                                child: Text(
-                                  'LIVING SPACE',
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 18.0),
-                                )),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Row(
-                                  children: [
-                                    SizedBox(
-                                      width: 35.0,
-                                      child: Align(
-                                          alignment: Alignment.centerLeft,
-                                          child: SvgPicture.asset(
-                                            'assets/icons/bedroom.svg',
-                                            color:
-                                                Theme.of(context).primaryColor,
-                                          )),
-                                    ),
-                                    Text(
-                                      'Bedroom',
+                        size: 24.0,
+                      ),
+                    )
+                  ],
+                ),
+                body: LayoutBuilder(builder:
+                    (BuildContext context, BoxConstraints viewportConstraints) {
+                  return SingleChildScrollView(
+                    controller: scrollController,
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                          minHeight: viewportConstraints.maxHeight),
+                      child: GestureDetector(
+                        onTap: () => {hideKeyboard()},
+                        child: Padding(
+                          padding: EdgeInsets.all(20.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Container(
+                                  child: TextField(
+                                      focusNode: titleFocus,
                                       style: TextStyle(
-                                          fontSize: 16.0,
-                                          color: Colors.black54),
-                                    )
-                                  ],
-                                ),
-                                NumberPicker(
-                                  value: bedrooms,
-                                  onChange: (newValue) => {
-                                    setState(() => {bedrooms = newValue})
-                                  },
-                                )
-                              ],
-                            ),
-                            Padding(
-                              padding: EdgeInsets.only(top: 15.0),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Row(
-                                    children: [
-                                      SizedBox(
-                                        width: 35.0,
-                                        child: Align(
-                                            alignment: Alignment.centerLeft,
-                                            child: SvgPicture.asset(
-                                              'assets/icons/bath.svg',
-                                              color: Theme.of(context)
-                                                  .primaryColor,
-                                            )),
-                                      ),
-                                      Text(
-                                        'Baths',
-                                        style: TextStyle(
-                                            fontSize: 16.0,
-                                            color: Colors.black54),
-                                      )
-                                    ],
-                                  ),
-                                  NumberPicker(
-                                    value: baths,
-                                    onChange: (newValue) => {
-                                      setState(() => {baths = newValue})
-                                    },
-                                  )
-                                ],
-                              ),
-                            ),
-                            Padding(
-                              padding: EdgeInsets.only(top: 15.0),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Row(
-                                    children: [
-                                      SizedBox(
-                                        width: 35.0,
-                                        child: Align(
-                                          alignment: Alignment.centerLeft,
-                                          child: Icon(
-                                            FontAwesomeIcons.layerGroup,
-                                            size: 16.0,
-                                            color:
-                                                Theme.of(context).primaryColor,
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 16.0),
+                                      decoration: InputDecoration(
+                                          labelStyle: TextStyle(
+                                              fontWeight: FontWeight.w300),
+                                          labelText: 'Title'),
+                                      onChanged: (String value) {
+                                        this.title = value.trim();
+                                      })),
+                              Container(
+                                  margin: EdgeInsets.only(top: 15.0),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: <Widget>[
+                                      Expanded(
+                                        flex: 2,
+                                        child: Container(
+                                          margin: EdgeInsets.only(right: 5.0),
+                                          child: TextField(
+                                            keyboardType:
+                                                TextInputType.datetime,
+                                            focusNode: yearFocus,
+                                            onTap: () => {openDatePicker()},
+                                            readOnly: true,
+                                            controller: yearController,
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.w700,
+                                                fontSize: 16.0),
+                                            decoration: InputDecoration(
+                                                labelStyle: TextStyle(
+                                                    fontWeight:
+                                                        FontWeight.w300),
+                                                labelText: 'Year built'),
                                           ),
                                         ),
                                       ),
+                                      Expanded(
+                                        flex: 8,
+                                        child: Container(
+                                          margin: EdgeInsets.only(left: 5.0),
+                                          child: Row(
+                                            children: [
+                                              Expanded(
+                                                flex: 3,
+                                                child: AwesomeDropDown(
+                                                  padding: 8,
+                                                  isPanDown: true,
+                                                  isBackPressedOrTouchedOutSide:
+                                                      _isBackPressedOrTouchedOutSide,
+                                                  dropDownList: [
+                                                    'USD',
+                                                    'EUR',
+                                                    'GBP',
+                                                    'CNY',
+                                                    'JPY',
+                                                    'AED',
+                                                    'SAR'
+                                                  ],
+                                                  onDropDownItemClick:
+                                                      (selectedItem) {
+                                                    selectedCurrency =
+                                                        selectedItem;
+                                                    print(selectedItem);
+                                                  },
+                                                  dropStateChanged: (isOpened) {
+                                                    _isDropDownOpened =
+                                                        isOpened;
+                                                    if (!isOpened) {
+                                                      _isBackPressedOrTouchedOutSide =
+                                                          false;
+                                                    }
+                                                  },
+                                                ),
+                                              ),
+                                              Expanded(
+                                                flex: 5,
+                                                child: TextField(
+                                                    keyboardType: TextInputType
+                                                        .numberWithOptions(
+                                                            decimal: true),
+                                                    focusNode: priceFocus,
+                                                    style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.w700,
+                                                        fontSize: 16.0),
+                                                    decoration: InputDecoration(
+                                                        labelStyle: TextStyle(
+                                                            fontWeight:
+                                                                FontWeight
+                                                                    .w300),
+                                                        labelText: 'Price'),
+                                                    onChanged: (String value) {
+                                                      this.price = value.trim();
+                                                    }),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  )),
+                              Container(
+                                  margin: EdgeInsets.only(top: 15.0),
+                                  child: TextField(
+                                      focusNode: locationFocus,
+                                      onTap: () {
+                                        openMapPicker();
+                                      },
+                                      readOnly: true,
+                                      controller: locationController,
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 16.0),
+                                      decoration: InputDecoration(
+                                          suffixIcon: SvgPicture.asset(
+                                            'assets/icons/location.svg',
+                                            height: 10,
+                                            width: 10,
+                                            fit: BoxFit.none,
+                                          ),
+                                          labelStyle: TextStyle(
+                                              fontWeight: FontWeight.w300),
+                                          labelText: 'Location'),
+                                      onChanged: (String value) {
+                                        this.location = value.trim();
+                                      })),
+                              Container(
+                                  margin: EdgeInsets.only(top: 15.0),
+                                  child: TextField(
+                                      focusNode: descriptionFocus,
+                                      minLines: 1,
+                                      maxLines: 10,
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 16.0),
+                                      decoration: InputDecoration(
+                                          labelStyle: TextStyle(
+                                              fontWeight: FontWeight.w300),
+                                          labelText: 'Description'),
+                                      onChanged: (String value) {
+                                        this.description = value.trim();
+                                      })),
+                              Container(
+                                  margin:
+                                      EdgeInsets.only(top: 30.0, bottom: 15.0),
+                                  child: Text(
+                                    'IMAGES',
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 18.0),
+                                  )),
+                              GridView.count(
+                                primary: false,
+                                shrinkWrap: true,
+                                crossAxisCount: 3,
+                                children: [...imagePreviews],
+                              ),
+                              Container(
+                                  margin: EdgeInsets.only(bottom: 15.0),
+                                  child: Text(
+                                    'TYPE',
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 18.0),
+                                  )),
+                              typeTags(),
+                              Container(
+                                  margin: EdgeInsets.only(top: 15.0),
+                                  child: TextField(
+                                      keyboardType: TextInputType.number,
+                                      focusNode: sizeFocus,
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 16.0),
+                                      decoration: InputDecoration(
+                                          labelStyle: TextStyle(
+                                              fontWeight: FontWeight.w300),
+                                          labelText: 'Size in SQFT'),
+                                      onChanged: (String value) {
+                                        this.size = value.trim();
+                                      })),
+                              Container(
+                                  margin:
+                                      EdgeInsets.only(top: 30.0, bottom: 15.0),
+                                  child: Text(
+                                    'LIVING SPACE',
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 18.0),
+                                  )),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Row(
+                                    children: [
+                                      SizedBox(
+                                        width: 35.0,
+                                        child: Align(
+                                            alignment: Alignment.centerLeft,
+                                            child: SvgPicture.asset(
+                                              'assets/icons/bedroom.svg',
+                                              color: Theme.of(context)
+                                                  .primaryColor,
+                                            )),
+                                      ),
                                       Text(
-                                        'Floors',
+                                        'Bedroom',
                                         style: TextStyle(
                                             fontSize: 16.0,
                                             color: Colors.black54),
@@ -426,124 +378,204 @@ class _CreatePostState extends State<CreatePost> {
                                     ],
                                   ),
                                   NumberPicker(
-                                    value: floors,
+                                    value: bedrooms,
                                     onChange: (newValue) => {
-                                      setState(() => {floors = newValue})
+                                      setState(() => {bedrooms = newValue})
                                     },
                                   )
                                 ],
                               ),
-                            ),
-                            Padding(
-                              padding: EdgeInsets.only(top: 15.0),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Row(
-                                    children: [
-                                      SizedBox(
-                                        width: 35.0,
-                                        child: Align(
+                              Padding(
+                                padding: EdgeInsets.only(top: 15.0),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        SizedBox(
+                                          width: 35.0,
+                                          child: Align(
+                                              alignment: Alignment.centerLeft,
+                                              child: SvgPicture.asset(
+                                                'assets/icons/bath.svg',
+                                                color: Theme.of(context)
+                                                    .primaryColor,
+                                              )),
+                                        ),
+                                        Text(
+                                          'Baths',
+                                          style: TextStyle(
+                                              fontSize: 16.0,
+                                              color: Colors.black54),
+                                        )
+                                      ],
+                                    ),
+                                    NumberPicker(
+                                      value: baths,
+                                      onChange: (newValue) => {
+                                        setState(() => {baths = newValue})
+                                      },
+                                    )
+                                  ],
+                                ),
+                              ),
+                              Padding(
+                                padding: EdgeInsets.only(top: 15.0),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        SizedBox(
+                                          width: 35.0,
+                                          child: Align(
                                             alignment: Alignment.centerLeft,
-                                            child: SvgPicture.asset(
-                                              'assets/icons/parking.svg',
+                                            child: Icon(
+                                              FontAwesomeIcons.layerGroup,
+                                              size: 16.0,
                                               color: Theme.of(context)
                                                   .primaryColor,
-                                            )),
-                                      ),
-                                      Text(
-                                        'Car Parking',
-                                        style: TextStyle(
-                                            fontSize: 16.0,
-                                            color: Colors.black54),
-                                      )
-                                    ],
-                                  ),
-                                  SizedBox(
-                                    width: 125.0,
-                                    height: 24.0,
-                                    child: Checkbox(
-                                      value: this.parking,
-                                      onChanged: (newValue) {
-                                        setState(() {
-                                          this.parking = newValue;
-                                        });
-                                      },
+                                            ),
+                                          ),
+                                        ),
+                                        Text(
+                                          'Floors',
+                                          style: TextStyle(
+                                              fontSize: 16.0,
+                                              color: Colors.black54),
+                                        )
+                                      ],
                                     ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Padding(
-                              padding: EdgeInsets.only(top: 20.0),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Row(
-                                    children: [
-                                      SizedBox(
-                                        width: 35.0,
-                                        child: Align(
-                                            alignment: Alignment.centerLeft,
-                                            child: SvgPicture.asset(
-                                              'assets/icons/maid.svg',
-                                              color: Theme.of(context)
-                                                  .primaryColor,
-                                            )),
-                                      ),
-                                      Text(
-                                        'Maid Room',
-                                        style: TextStyle(
-                                            fontSize: 16.0,
-                                            color: Colors.black54),
-                                      )
-                                    ],
-                                  ),
-                                  SizedBox(
-                                    width: 125.0,
-                                    height: 24.0,
-                                    child: Checkbox(
-                                      value: this.maid,
-                                      onChanged: (newValue) {
-                                        setState(() {
-                                          this.maid = newValue;
-                                        });
+                                    NumberPicker(
+                                      value: floors,
+                                      onChange: (newValue) => {
+                                        setState(() => {floors = newValue})
                                       },
-                                    ),
-                                  ),
-                                ],
+                                    )
+                                  ],
+                                ),
                               ),
-                            ),
-                            ...availableForSelect(),
-                            ...rentSelect(),
-                            ...interiorSelect(),
-                            // ...paymentDetails(),
-                            bottomButtons(),
-                          ],
+                              Padding(
+                                padding: EdgeInsets.only(top: 15.0),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        SizedBox(
+                                          width: 35.0,
+                                          child: Align(
+                                              alignment: Alignment.centerLeft,
+                                              child: SvgPicture.asset(
+                                                'assets/icons/parking.svg',
+                                                color: Theme.of(context)
+                                                    .primaryColor,
+                                              )),
+                                        ),
+                                        Text(
+                                          'Car Parking',
+                                          style: TextStyle(
+                                              fontSize: 16.0,
+                                              color: Colors.black54),
+                                        )
+                                      ],
+                                    ),
+                                    SizedBox(
+                                      width: 125.0,
+                                      height: 24.0,
+                                      child: Checkbox(
+                                        value: this.parking,
+                                        onChanged: (newValue) {
+                                          setState(() {
+                                            this.parking = newValue;
+                                          });
+                                        },
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Padding(
+                                padding: EdgeInsets.only(top: 20.0),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        SizedBox(
+                                          width: 35.0,
+                                          child: Align(
+                                              alignment: Alignment.centerLeft,
+                                              child: SvgPicture.asset(
+                                                'assets/icons/maid.svg',
+                                                color: Theme.of(context)
+                                                    .primaryColor,
+                                              )),
+                                        ),
+                                        Text(
+                                          'Maid Room',
+                                          style: TextStyle(
+                                              fontSize: 16.0,
+                                              color: Colors.black54),
+                                        )
+                                      ],
+                                    ),
+                                    SizedBox(
+                                      width: 125.0,
+                                      height: 24.0,
+                                      child: Checkbox(
+                                        value: this.maid,
+                                        onChanged: (newValue) {
+                                          setState(() {
+                                            this.maid = newValue;
+                                          });
+                                        },
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              ...availableForSelect(),
+                              ...rentSelect(),
+                              ...interiorSelect(),
+                              // ...paymentDetails(),
+                              bottomButtons(),
+                            ],
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                );
-              }),
+                  );
+                }),
+              ),
             ),
-          ),
-          Positioned(
-            child: isLoading
-                ? Loader(
-                    text: 'Creating Post..',
-                  )
-                : Container(),
-          )
-        ],
+            Positioned(
+              child: isLoading
+                  ? Loader(
+                      text: 'Creating Post..',
+                    )
+                  : Container(),
+            )
+          ],
+        ),
       ),
     );
   }
 
   hideKeyboard() {
     FocusScope.of(context).unfocus();
+  }
+
+  void _removeFocus() {
+    if (_isDropDownOpened) {
+      setState(() {
+        _isBackPressedOrTouchedOutSide = true;
+      });
+    }
   }
 
   List<Widget> availableForSelect() {
@@ -869,7 +901,7 @@ class _CreatePostState extends State<CreatePost> {
 
   getApiKeys() async {
     await DbFirestore().getKeys().then((_keys) {
-      gmaps_api_key = _keys.data()['gmaps_api_key'];
+      gmaps_api_key = _keys.data()!['gmaps_api_key'];
     });
   }
 

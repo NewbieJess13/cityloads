@@ -298,7 +298,7 @@ class _UserSettingsState extends State<UserSettings> {
                                 String? about = '';
                                 DbFirestore().getAboutTerms().then((_about) {
                                   setState(() {
-                                    about = _about.data()['about'];
+                                    about = _about.data()!['about'];
                                   });
                                   openAbout(about);
                                 });
@@ -334,7 +334,7 @@ class _UserSettingsState extends State<UserSettings> {
                                 String? terms = '';
                                 DbFirestore().getPrivacyPolicy().then((_about) {
                                   setState(() {
-                                    terms = _about.data()['terms'];
+                                    terms = _about.data()!['terms'];
                                   });
                                   openTerms(terms);
                                 });

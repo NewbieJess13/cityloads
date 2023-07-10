@@ -454,15 +454,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.13.1"
-  flutter_link_preview:
-    dependency: "direct main"
-    description:
-      path: "."
-      ref: HEAD
-      resolved-ref: "14cf20e2a447b31d4dca6a7f7872c7c299482dd5"
-      url: "https://github.com/ItzNotABug/flutter_link_preview"
-    source: git
-    version: "1.5.6"
   flutter_local_notifications:
     dependency: "direct main"
     description:
@@ -503,14 +494,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.14"
-  flutter_range_slider:
-    dependency: "direct main"
-    description:
-      name: flutter_range_slider
-      sha256: "2d5937695dd01c447084c6bb9c8ca0efcdd2838a9cc0dcd70b426e3736dbd22b"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.5.0"
   flutter_range_slider_ns:
     dependency: "direct main"
     description:
@@ -681,14 +664,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.7.0+1"
-  gbk2utf8:
-    dependency: transitive
-    description:
-      name: gbk2utf8
-      sha256: "83a255e974b970d20538c1661bd5b7ee9120e106fbb10478cffcd515ba480e34"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.1"
   geocoding:
     dependency: "direct main"
     description:
@@ -1450,10 +1425,10 @@ packages:
     dependency: "direct main"
     description:
       name: timeago
-      sha256: "1793df22d608b7a57bf0e1fd704773a93e9ad68e55c1d7967e496c7ebcfa050f"
+      sha256: a415b9a05ef64b845c859a91161fc9f689f88eaaa4c04759517d201891b99e90
       url: "https://pub.dev"
     source: hosted
-    version: "2.0.27"
+    version: "3.4.0"
   timezone:
     dependency: transitive
     description:

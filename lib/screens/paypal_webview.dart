@@ -1,6 +1,6 @@
-import 'dart:io';
 import 'package:CityLoads/helpers/conn_firestore.dart';
 import 'package:CityLoads/helpers/paypal_services.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:webview_flutter/webview_flutter.dart';
@@ -114,42 +114,42 @@ class _PayPalWebViewState extends State<PayPalWebView> {
   @override
   void initState() {
     // if (Platform.isAndroid) WebView.platform = SurfaceAndroidWebView();
-    instantiateWebViewController();
-    Future.delayed(Duration.zero, () async {
-      try {
-        await DbFirestore().getKeys().then(
-          (_keys) {
-            paypalClientId = _keys.data()['paypal_client_id'];
-            paypalSecretKey = _keys.data()['paypal_secret_key'];
-          },
-        );
-        await DbFirestore().getPaypalCharge().then(
-          (_keys) {
-            chargeAmount = _keys.data()['charge'];
-          },
-        );
-        accessToken =
-            await services.getAccessToken(paypalClientId!, paypalSecretKey!);
-        final transactions = getOrderParams();
-        final res =
-            await services.createPaypalPayment(transactions, accessToken);
-        if (res != null) {
-          setState(() {
-            checkoutUrl = res["approvalUrl"];
-            executeUrl = res["executeUrl"];
-          });
-        }
-      } catch (e) {
-        print('exception: ' + e.toString());
-        Fluttertoast.showToast(
-          msg: e.toString(),
-          backgroundColor: Colors.green,
-          textColor: Colors.white,
-        );
-      }
-    });
+    getPaypalCredentials();
 
     super.initState();
+  }
+
+  Future getPaypalCredentials() async {
+    try {
+      DocumentSnapshot<Map<String, dynamic>> _paypalKeys =
+          await DbFirestore().getKeys();
+      paypalClientId = _paypalKeys.data()!['paypal_client_id'];
+      paypalSecretKey = _paypalKeys.data()!['paypal_secret_key'];
+
+      DocumentSnapshot<Map<String, dynamic>> _paypalCharge =
+          await DbFirestore().getPaypalCharge();
+
+      chargeAmount = _paypalCharge.data()!['charge'];
+
+      accessToken =
+          await services.getAccessToken(paypalClientId!, paypalSecretKey!);
+      final transactions = getOrderParams();
+      final res = await services.createPaypalPayment(transactions, accessToken);
+      if (res != null) {
+        checkoutUrl = res["approvalUrl"];
+        executeUrl = res["executeUrl"];
+      }
+      print(checkoutUrl);
+    } catch (e) {
+      print('exception: ' + e.toString());
+      Fluttertoast.showToast(
+        msg: e.toString(),
+        backgroundColor: Colors.green,
+        textColor: Colors.white,
+      );
+    }
+    instantiateWebViewController();
+    setState(() {});
   }
 
   @override
@@ -157,7 +157,7 @@ class _PayPalWebViewState extends State<PayPalWebView> {
     if (checkoutUrl != null) {
       return Scaffold(
         appBar: AppBar(
-          backgroundColor: Theme.of(context).backgroundColor,
+          backgroundColor: Theme.of(context).colorScheme.background,
           leading: GestureDetector(
             child: Icon(Icons.arrow_back_ios),
             onTap: () => Navigator.pop(context),

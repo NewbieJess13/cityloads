@@ -15,7 +15,7 @@ publish_to: "none" # Remove this line if you wish to publish to pub.dev
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 1.2.8+9
+version: 1.2.8+10
 
 environment:
   sdk: ">=2.12.0 <3.0.0"
@@ -46,9 +46,9 @@ dependencies:
   provider: ^6.0.5
   tuple: ^2.0.1
   uuid: ^3.0.4
-  timeago: 2.0.27
+  timeago: ^3.4.0
   jiffy: ^6.1.0
-  flutter_range_slider: ^1.5.0
+  # flutter_range_slider: ^1.5.0
   flutter_range_slider_ns: ^0.0.2
   carousel_slider: ^4.2.1
   credit_card_type_detector: ^3.0.0
@@ -66,9 +66,9 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.3
   xml2json: ^5.3.1
-  flutter_link_preview:
-    git: "https://github.com/ItzNotABug/flutter_link_preview"
-  url_launcher: ^6.0.7
+  url_launcher: ^6.1.11
+  # flutter_link_preview:
+  #   git: "https://github.com/ItzNotABug/flutter_link_preview"
   http_parser: ^4.0.2
   firebase_core: ^2.12.0
   # mailer2: ^1.2.5

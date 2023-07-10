@@ -137,8 +137,8 @@ class _HelpScreenState extends State<HelpScreen> {
     String emailPassword = '';
 
     await DbFirestore().getAdminCredential().then((_credential) {
-      emailAddress = _credential.data()['email'];
-      emailPassword = _credential.data()['password'];
+      emailAddress = _credential.data()!['email'];
+      emailPassword = _credential.data()!['password'];
     });
 
     var options = gmail(emailAddress, emailPassword);

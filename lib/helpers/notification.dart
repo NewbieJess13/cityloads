@@ -9,16 +9,16 @@ String? SERVER_TOKEN = '';
 
 getApiKeys() {
   DbFirestore().getKeys().then((_keys) {
-    SERVER_TOKEN = _keys.data()['firebase_messaging_token'];
+    SERVER_TOKEN = _keys.data()!['firebase_messaging_token'];
   });
 }
 
-SendNotification(
-    String? userId, String title, String body, Map<String, dynamic> data) async {
+SendNotification(String? userId, String title, String body,
+    Map<String, dynamic> data) async {
   DocumentSnapshot<Map<String, dynamic>> userDoc =
       await FirebaseFirestore.instance.collection('users').doc(userId).get();
   getApiKeys();
-  if (userDoc != null) {
+  if (userDoc.data() != null) {
     String? deviceToken = userDoc.data()!['deviceToken'];
     data['click_action'] = 'FLUTTER_NOTIFICATION_CLICK';
     if (deviceToken != null) {
